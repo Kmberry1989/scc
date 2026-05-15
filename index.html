@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sensory Collectible Creator</title>
+    <style>
+        :root {
+            --bg-color: #1e1e24;
+            --panel-bg: #2b2b36;
+            --text-main: #f0f0f5;
+            --text-muted: #a0a0b0;
+            --accent: #4a90e2;
+            --accent-hover: #357abd;
+            --border: #404050;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow: hidden;
+        }
+
+        #sidebar {
+            width: 380px;
+            background-color: var(--panel-bg);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+
+        .panel-header {
+            padding: 20px;
+            background-color: rgba(0,0,0,0.2);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .panel-header h1 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: var(--text-main);
+        }
+
+        .panel-content {
+            padding: 20px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        select, input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            background-color: #1a1a20;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            border-radius: 6px;
+            font-family: monospace;
+            box-sizing: border-box;
+        }
+
+        select {
+            font-family: inherit;
+            cursor: pointer;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.2s;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            background-color: var(--accent-hover);
+        }
+
+        button.secondary {
+            background-color: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+        }
+
+        button.secondary:hover {
+            background-color: rgba(74, 144, 226, 0.1);
+        }
+
+        #description-box {
+            font-size: 0.85rem;
+            line-height: 1.4;
+            color: var(--text-muted);
+            background-color: rgba(0,0,0,0.2);
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            min-height: 40px;
+        }
+
+        #saved-bank {
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+            margin-top: 20px;
+        }
+
+        .saved-item {
+            background-color: #1a1a20;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+
+        .saved-item:hover {
+            border-color: var(--accent);
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #ff4a4a;
+            width: auto;
+            padding: 5px;
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .delete-btn:hover {
+            background: none;
+            color: #ff7a7a;
+        }
+
+        #canvas-container {
+            flex-grow: 1;
+            position: relative;
+            background: radial-gradient(circle at center, #2a2a35 0%, #101015 100%);
+        }
+
+        #error-msg {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 74, 74, 0.9);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            display: none;
+            z-index: 20;
+            font-weight: bold;
+        }
+    </style>
+    
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+<body>
+
+    <div id="sidebar">
+        <div class="panel-header">
+            <h1>Sensory Collectible Creator</h1>
+        </div>
+        <div class="panel-content">
+            
+            <div class="control-group">
+                <label for="preset-select">Equation Library</label>
+                <select id="preset-select"></select>
+            </div>
+
+            <div id="description-box"></div>
+
+            <div class="control-group">
+                <label for="equation-input">Z = f(x, y) JavaScript Math</label>
+                <input type="text" id="equation-input" value="Math.sin(Math.sqrt(x*x + y*y))">
+            </div>
+
+            <div class="control-group grid-2">
+                <div>
+                    <label>Bounds (Min)</label>
+                    <input type="number" id="bounds-min" value="-10" step="1">
+                </div>
+                <div>
+                    <label>Bounds (Max)</label>
+                    <input type="number" id="bounds-max" value="10" step="1">
+                </div>
+            </div>
+
+            <button id="btn-render">Render Surface</button>
+            <button id="btn-export" class="secondary">Export STL for Slicer</button>
+
+            <div id="saved-bank">
+                <label>Saved Designs Bank</label>
+                <div class="control-group grid-2">
+                    <input type="text" id="save-name" placeholder="Name this design...">
+                    <button id="btn-save" style="margin-bottom:0;">Save</button>
+                </div>
+                <div id="saved-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="canvas-container">
+        <div id="error-msg">Invalid JavaScript Equation</div>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { STLExporter } from 'three/addons/exporters/STLExporter.js';
+
+        // --- 1. Data Bank ---
+        const equationLibrary = [
+            { id: 'ripple', title: 'The Water Ripple', desc: 'Concentric expanding rings. Soothing, continuous tracing.', eq: 'Math.sin(Math.sqrt(x*x + y*y))' },
+            { id: 'egg', title: 'The Egg Carton', desc: 'A repeating grid of undulating bumps and dips.', eq: 'Math.sin(x) * Math.cos(y)' },
+            { id: 'saddle', title: 'The Saddle', desc: 'Hyperbolic paraboloid curving upwards in one direction.', eq: '(x*x - y*y) / 10' },
+            { id: 'sombrero', title: 'The Sombrero', desc: 'Central peak with ripples that diminish outward.', eq: '10 * Math.sin(Math.sqrt(x*x + y*y)) / (Math.sqrt(x*x + y*y) + 0.001)' },
+            { id: 'waves', title: 'Intersecting Waves', desc: 'Simple rolling surface, like crossing ocean swells.', eq: 'Math.sin(x) + Math.cos(y)' },
+            { id: 'knurling', title: 'Diamond Knurling', desc: 'Sharp, repeating diamond pattern for intense grip.', eq: 'Math.abs(Math.sin(x)) + Math.abs(Math.cos(y))' },
+            { id: 'spikes', title: 'Soft Spikes', desc: 'Waves that tighten and sharpen as they move outward.', eq: 'Math.sin(x * y)' },
+            { id: 'terrain', title: 'Rolling Terrain', desc: 'Organic, uneven hills and valleys.', eq: 'Math.sin(x) + 0.5 * Math.sin(2 * y) + 0.25 * Math.cos(3 * x)' },
+            { id: 'waffle', title: 'The Waffle Iron', desc: 'Deep, interlocking geometric pockets.', eq: 'Math.cos(x) + Math.cos(y) + Math.cos(x+y)' },
+            { id: 'nodes', title: 'Massage Nodes', desc: 'Separated mounds. Excellent for deep pressure feedback.', eq: '2 * Math.abs(Math.sin(x)) * Math.abs(Math.sin(y))' },
+            { id: 'fingerprint', title: 'The Fingerprint', desc: 'Continuous spiral ridge radiating from the center.', eq: 'Math.sin(Math.sqrt(x*x + y*y) - Math.atan2(y, x) * 3)' },
+            { id: 'corduroy', title: 'Directional Corduroy', desc: 'Wavy ridges that create auditory feedback when scratched.', eq: 'Math.sin(2 * x + Math.sin(y))' },
+            { id: 'dimples', title: 'Dimpled Surface', desc: 'Soothing craters where fingertips naturally rest.', eq: '-(Math.pow(Math.cos(x), 2) + Math.pow(Math.cos(y), 2))' },
+            { id: 'macromicro', title: 'Macro/Micro Dual-Feed', desc: 'Smooth rolling wave with a sharp micro-stippling overlay.', eq: 'Math.sin(x/2) * Math.cos(y/2) + 0.3 * Math.sin(x*4) * Math.cos(y*4)' },
+            { id: 'interference', title: 'Interference Static', desc: 'Transitions from calm ripples into chaotic sharp peaks.', eq: 'Math.sin((x * y) / 3) * Math.cos(x + y)' },
+            { id: 'glitch', title: 'Digital Glitch', desc: 'Hard, stepped plateaus like a topographic map.', eq: 'Math.floor(Math.sin(x) * 3) / 3 + Math.floor(Math.cos(y) * 3) / 3' },
+            { id: 'dragon', title: 'Dragon Scales', desc: 'Smooth in one direction, sharp ridges in the other.', eq: '0.5 * Math.sin(x) + Math.abs(Math.sin(x+y))' },
+            { id: 'braided', title: 'Braided Cord', desc: 'Overlapping, woven texture. Rhythmic and satisfying.', eq: 'Math.sin(x + Math.sin(y)) + Math.cos(y + Math.cos(x))' },
+            { id: 'thorns', title: 'Crystalline Thorns', desc: 'Dramatic concave spikes for pinpoint pressure stimulation.', eq: 'Math.sqrt(Math.abs(Math.sin(x) * Math.cos(y)))' },
+            { id: 'starburst', title: 'The Starburst', desc: 'Radiating ridges from the center. Good for rapid flicking.', eq: 'Math.sin(Math.atan2(y, x) * 12)' },
+            { id: 'bubble', title: 'Bubble Wrap', desc: 'Isolated round domes with negative resting space.', eq: 'Math.pow(Math.sin(x) * Math.sin(y), 2)' },
+            { id: 'pyramid', title: 'Stepped Pyramid', desc: 'Hard edges and flat tops.', eq: 'Math.floor(x) + Math.floor(y)' },
+            { id: 'linear', title: 'Linear Micro-Vibrations', desc: 'Predictable tracing path with subtle fine-grain vibration.', eq: 'x + 0.1 * Math.sin(y*5)' }
+        ];
+
+        // --- 2. Three.js Setup ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        
+        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+        camera.position.set(20, 25, 20);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        container.appendChild(renderer.domElement);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+
+        // Lighting to highlight topography (Simulating PLA/Silk PLA sheen)
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+        dirLight.position.set(10, 20, 10);
+        dirLight.castShadow = true;
+        dirLight.shadow.mapSize.width = 2048;
+        dirLight.shadow.mapSize.height = 2048;
+        scene.add(dirLight);
+
+        const backLight = new THREE.DirectionalLight(0x88bbff, 0.5);
+        backLight.position.set(-10, 10, -10);
+        scene.add(backLight);
+
+        // Grid
+        const gridHelper = new THREE.GridHelper(40, 40, 0x444455, 0x222233);
+        gridHelper.position.y = -5; // Move grid slightly down
+        scene.add(gridHelper);
+
+        // Material (Glossy to simulate Silk PLA)
+        const material = new THREE.MeshStandardMaterial({ 
+            color: 0x4a90e2, 
+            roughness: 0.2, 
+            metalness: 0.1,
+            side: THREE.DoubleSide
+        });
+
+        let currentMesh = null;
+
+        // --- 3. Core Logic ---
+        function generateSurface() {
+            const eqStr = document.getElementById('equation-input').value;
+            const min = parseFloat(document.getElementById('bounds-min').value);
+            const max = parseFloat(document.getElementById('bounds-max').value);
+            const errorMsg = document.getElementById('error-msg');
+
+            if (currentMesh) {
+                scene.remove(currentMesh);
+                currentMesh.geometry.dispose();
+            }
+
+            try {
+                // Safely create the dynamic function
+                const zFunc = new Function('x', 'y', 'return ' + eqStr + ';');
+                
+                // Test the function to ensure it doesn't crash
+                zFunc(0, 0); 
+                errorMsg.style.display = 'none';
+
+                const size = max - min;
+                const segments = 150; // High resolution for micro-textures
+                
+                // Use a PlaneGeometry
+                const geometry = new THREE.PlaneGeometry(size, size, segments, segments);
+                
+                // Displace vertices based on the math function
+                const positions = geometry.attributes.position;
+                for (let i = 0; i < positions.count; i++) {
+                    // X and Y in Three.js plane are local to the plane size
+                    // We need to map them back to the user's min/max bounds
+                    const localX = positions.getX(i);
+                    const localY = positions.getY(i);
+                    
+                    const mappedX = mapRange(localX, -size/2, size/2, min, max);
+                    const mappedY = mapRange(localY, -size/2, size/2, min, max);
+
+                    const zVal = zFunc(mappedX, mappedY);
+                    
+                    // In Three.js, a standard plane lies on X/Y and faces +Z. 
+                    // We will set the Z displacement here.
+                    if(!isNaN(zVal)) {
+                        positions.setZ(i, zVal);
+                    }
+                }
+
+                geometry.computeVertexNormals();
+                
+                currentMesh = new THREE.Mesh(geometry, material);
+                currentMesh.rotation.x = -Math.PI / 2; // Lay flat
+                currentMesh.castShadow = true;
+                currentMesh.receiveShadow = true;
+                
+                scene.add(currentMesh);
+
+            } catch (e) {
+                console.error(e);
+                errorMsg.style.display = 'block';
+            }
+        }
+
+        function mapRange(value, inMin, inMax, outMin, outMax) {
+            return (value - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
+        }
+
+        function exportSTL() {
+            if (!currentMesh) return;
+            const exporter = new STLExporter();
+            // Note: This exports a surface mesh. Slicers like Orca Slicer 
+            // can add thickness or treat it as a top surface modifier.
+            const stlString = exporter.parse(scene);
+            
+            const blob = new Blob([stlString], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.style.display = 'none';
+            link.href = url;
+            link.download = 'Sensory_Collectible_Surface.stl';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        // --- 4. UI & Storage Management ---
+        const selectBox = document.getElementById('preset-select');
+        const descBox = document.getElementById('description-box');
+        const eqInput = document.getElementById('equation-input');
+        const savedList = document.getElementById('saved-list');
+
+        function initUI() {
+            // Populate Dropdown
+            equationLibrary.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item.id;
+                opt.textContent = item.title;
+                selectBox.appendChild(opt);
+            });
+
+            // Handle Dropdown Change
+            selectBox.addEventListener('change', (e) => {
+                const selected = equationLibrary.find(i => i.id === e.target.value);
+                if (selected) {
+                    descBox.textContent = selected.desc;
+                    eqInput.value = selected.eq;
+                    generateSurface();
+                }
+            });
+
+            // Initial load
+            descBox.textContent = equationLibrary[0].desc;
+            
+            // Buttons
+            document.getElementById('btn-render').addEventListener('click', generateSurface);
+            document.getElementById('btn-export').addEventListener('click', exportSTL);
+            document.getElementById('btn-save').addEventListener('click', saveToBank);
+
+            renderSavedBank();
+            generateSurface();
+        }
+
+        function saveToBank() {
+            const nameInput = document.getElementById('save-name');
+            const name = nameInput.value.trim() || `Design ${Date.now().toString().slice(-4)}`;
+            const currentEq = eqInput.value;
+            const bMin = document.getElementById('bounds-min').value;
+            const bMax = document.getElementById('bounds-max').value;
+
+            const newSave = { id: Date.now(), name, eq: currentEq, min: bMin, max: bMax };
+            
+            let bank = JSON.parse(localStorage.getItem('sensoryBank') || '[]');
+            bank.push(newSave);
+            localStorage.setItem('sensoryBank', JSON.stringify(bank));
+            
+            nameInput.value = '';
+            renderSavedBank();
+        }
+
+        function renderSavedBank() {
+            savedList.innerHTML = '';
+            let bank = JSON.parse(localStorage.getItem('sensoryBank') || '[]');
+            
+            bank.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'saved-item';
+                
+                const textSpan = document.createElement('span');
+                textSpan.textContent = item.name;
+                textSpan.style.flexGrow = '1';
+                
+                // Load design on click
+                textSpan.onclick = () => {
+                    eqInput.value = item.eq;
+                    document.getElementById('bounds-min').value = item.min;
+                    document.getElementById('bounds-max').value = item.max;
+                    descBox.textContent = `Loaded Custom Design: ${item.name}`;
+                    generateSurface();
+                };
+
+                const delBtn = document.createElement('button');
+                delBtn.className = 'delete-btn';
+                delBtn.innerHTML = '×';
+                delBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    bank = bank.filter(b => b.id !== item.id);
+                    localStorage.setItem('sensoryBank', JSON.stringify(bank));
+                    renderSavedBank();
+                };
+
+                div.appendChild(textSpan);
+                div.appendChild(delBtn);
+                savedList.appendChild(div);
+            });
+        }
+
+        // --- 5. Render Loop ---
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // Handle Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        });
+
+        initUI();
+        animate();
+    </script>
+</body>
+</html>
