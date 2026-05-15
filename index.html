@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sensory Collectible Creator</title>
+    <title>Sensory Collectible Creator - Pro</title>
     <style>
         :root {
             --bg-color: #1e1e24;
@@ -13,6 +13,7 @@
             --accent: #4a90e2;
             --accent-hover: #357abd;
             --border: #404050;
+            --panel-width: 420px;
         }
 
         body {
@@ -27,7 +28,7 @@
         }
 
         #sidebar {
-            width: 380px;
+            width: var(--panel-width);
             background-color: var(--panel-bg);
             border-right: 1px solid var(--border);
             display: flex;
@@ -37,7 +38,7 @@
         }
 
         .panel-header {
-            padding: 20px;
+            padding: 15px 20px;
             background-color: rgba(0,0,0,0.2);
             border-bottom: 1px solid var(--border);
         }
@@ -54,38 +55,58 @@
             flex-grow: 1;
         }
 
-        .control-group {
-            margin-bottom: 20px;
+        .section-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent);
+            margin: 25px 0 10px 0;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 5px;
         }
+        
+        .section-title:first-child { margin-top: 0; }
+
+        .control-group { margin-bottom: 15px; }
 
         label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 0.85rem;
             font-weight: 600;
             color: var(--text-muted);
         }
 
-        select, input[type="text"], input[type="number"] {
+        select, input[type="text"], input[type="number"], textarea {
             width: 100%;
-            padding: 10px;
+            padding: 8px 10px;
             background-color: #1a1a20;
             border: 1px solid var(--border);
             color: var(--text-main);
             border-radius: 6px;
             font-family: monospace;
             box-sizing: border-box;
+            font-size: 0.9rem;
         }
 
-        select {
-            font-family: inherit;
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+            font-size: 0.8rem;
+            line-height: 1.3;
+            background-color: #111115;
+            color: #88ff88;
+        }
+
+        select { cursor: pointer; font-family: inherit; }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+        input[type="range"] {
+            width: 100%;
+            margin: 5px 0;
             cursor: pointer;
-        }
-
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
         }
 
         button {
@@ -101,67 +122,42 @@
             margin-bottom: 10px;
         }
 
-        button:hover {
-            background-color: var(--accent-hover);
-        }
-
+        button:hover { background-color: var(--accent-hover); }
+        
         button.secondary {
             background-color: transparent;
             border: 1px solid var(--accent);
             color: var(--accent);
         }
+        button.secondary:hover { background-color: rgba(74, 144, 226, 0.1); }
 
-        button.secondary:hover {
-            background-color: rgba(74, 144, 226, 0.1);
-        }
-
-        #description-box {
-            font-size: 0.85rem;
-            line-height: 1.4;
-            color: var(--text-muted);
-            background-color: rgba(0,0,0,0.2);
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            min-height: 40px;
-        }
-
-        #saved-bank {
-            border-top: 1px solid var(--border);
-            padding-top: 20px;
-            margin-top: 20px;
-        }
+        #saved-bank { margin-top: 10px; }
 
         .saved-item {
             background-color: #1a1a20;
-            padding: 10px;
+            padding: 8px 10px;
             border-radius: 6px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
             border: 1px solid transparent;
+            font-size: 0.9rem;
         }
 
-        .saved-item:hover {
-            border-color: var(--accent);
-        }
+        .saved-item:hover { border-color: var(--accent); }
 
         .delete-btn {
             background: none;
             border: none;
             color: #ff4a4a;
             width: auto;
-            padding: 5px;
+            padding: 0 5px;
             margin: 0;
             font-size: 1.2rem;
         }
-
-        .delete-btn:hover {
-            background: none;
-            color: #ff7a7a;
-        }
+        .delete-btn:hover { background: none; color: #ff7a7a; }
 
         #canvas-container {
             flex-grow: 1;
@@ -201,16 +197,41 @@
         </div>
         <div class="panel-content">
             
+            <div class="section-title">Combo Builder</div>
+            
             <div class="control-group">
-                <label for="preset-select">Equation Library</label>
-                <select id="preset-select"></select>
+                <label>Base Pattern (Macro)</label>
+                <select id="base-select"></select>
+            </div>
+            
+            <div class="control-group">
+                <label>Micro Detail (Texture)</label>
+                <select id="micro-select"></select>
             </div>
 
-            <div id="description-box"></div>
+            <div class="control-group grid-2">
+                <div>
+                    <label>Intensity <span id="intensity-val">0.5</span></label>
+                    <input type="range" id="intensity" min="0" max="2" step="0.05" value="0.5">
+                </div>
+                <div>
+                    <label>Rotation <span id="rotation-val">45°</span></label>
+                    <input type="range" id="rotation" min="0" max="360" step="5" value="45">
+                </div>
+            </div>
+
+            <div class="section-title">Raw Mathematical Logic</div>
+            
+            <div class="control-group">
+                <label>Presets / Single Equations</label>
+                <select id="preset-select">
+                    <option value="">-- Load a classic preset --</option>
+                </select>
+            </div>
 
             <div class="control-group">
-                <label for="equation-input">Z = f(x, y) JavaScript Math</label>
-                <input type="text" id="equation-input" value="Math.sin(Math.sqrt(x*x + y*y))">
+                <label>Z = f(x, y) JavaScript</label>
+                <textarea id="equation-input"></textarea>
             </div>
 
             <div class="control-group grid-2">
@@ -224,13 +245,13 @@
                 </div>
             </div>
 
-            <button id="btn-render">Render Surface</button>
-            <button id="btn-export" class="secondary">Export STL for Slicer</button>
+            <button id="btn-render">Force Render</button>
+            <button id="btn-export" class="secondary">Export STL</button>
 
+            <div class="section-title">Design Bank</div>
             <div id="saved-bank">
-                <label>Saved Designs Bank</label>
                 <div class="control-group grid-2">
-                    <input type="text" id="save-name" placeholder="Name this design...">
+                    <input type="text" id="save-name" placeholder="Name design...">
                     <button id="btn-save" style="margin-bottom:0;">Save</button>
                 </div>
                 <div id="saved-list"></div>
@@ -247,39 +268,60 @@
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         import { STLExporter } from 'three/addons/exporters/STLExporter.js';
 
-        // --- 1. Data Bank ---
+        // --- 1. Data Banks ---
+        
+        // Full Library for Presets
         const equationLibrary = [
-            { id: 'ripple', title: 'The Water Ripple', desc: 'Concentric expanding rings. Soothing, continuous tracing.', eq: 'Math.sin(Math.sqrt(x*x + y*y))' },
-            { id: 'egg', title: 'The Egg Carton', desc: 'A repeating grid of undulating bumps and dips.', eq: 'Math.sin(x) * Math.cos(y)' },
-            { id: 'saddle', title: 'The Saddle', desc: 'Hyperbolic paraboloid curving upwards in one direction.', eq: '(x*x - y*y) / 10' },
-            { id: 'sombrero', title: 'The Sombrero', desc: 'Central peak with ripples that diminish outward.', eq: '10 * Math.sin(Math.sqrt(x*x + y*y)) / (Math.sqrt(x*x + y*y) + 0.001)' },
-            { id: 'waves', title: 'Intersecting Waves', desc: 'Simple rolling surface, like crossing ocean swells.', eq: 'Math.sin(x) + Math.cos(y)' },
-            { id: 'knurling', title: 'Diamond Knurling', desc: 'Sharp, repeating diamond pattern for intense grip.', eq: 'Math.abs(Math.sin(x)) + Math.abs(Math.cos(y))' },
-            { id: 'spikes', title: 'Soft Spikes', desc: 'Waves that tighten and sharpen as they move outward.', eq: 'Math.sin(x * y)' },
-            { id: 'terrain', title: 'Rolling Terrain', desc: 'Organic, uneven hills and valleys.', eq: 'Math.sin(x) + 0.5 * Math.sin(2 * y) + 0.25 * Math.cos(3 * x)' },
-            { id: 'waffle', title: 'The Waffle Iron', desc: 'Deep, interlocking geometric pockets.', eq: 'Math.cos(x) + Math.cos(y) + Math.cos(x+y)' },
-            { id: 'nodes', title: 'Massage Nodes', desc: 'Separated mounds. Excellent for deep pressure feedback.', eq: '2 * Math.abs(Math.sin(x)) * Math.abs(Math.sin(y))' },
-            { id: 'fingerprint', title: 'The Fingerprint', desc: 'Continuous spiral ridge radiating from the center.', eq: 'Math.sin(Math.sqrt(x*x + y*y) - Math.atan2(y, x) * 3)' },
-            { id: 'corduroy', title: 'Directional Corduroy', desc: 'Wavy ridges that create auditory feedback when scratched.', eq: 'Math.sin(2 * x + Math.sin(y))' },
-            { id: 'dimples', title: 'Dimpled Surface', desc: 'Soothing craters where fingertips naturally rest.', eq: '-(Math.pow(Math.cos(x), 2) + Math.pow(Math.cos(y), 2))' },
-            { id: 'macromicro', title: 'Macro/Micro Dual-Feed', desc: 'Smooth rolling wave with a sharp micro-stippling overlay.', eq: 'Math.sin(x/2) * Math.cos(y/2) + 0.3 * Math.sin(x*4) * Math.cos(y*4)' },
-            { id: 'interference', title: 'Interference Static', desc: 'Transitions from calm ripples into chaotic sharp peaks.', eq: 'Math.sin((x * y) / 3) * Math.cos(x + y)' },
-            { id: 'glitch', title: 'Digital Glitch', desc: 'Hard, stepped plateaus like a topographic map.', eq: 'Math.floor(Math.sin(x) * 3) / 3 + Math.floor(Math.cos(y) * 3) / 3' },
-            { id: 'dragon', title: 'Dragon Scales', desc: 'Smooth in one direction, sharp ridges in the other.', eq: '0.5 * Math.sin(x) + Math.abs(Math.sin(x+y))' },
-            { id: 'braided', title: 'Braided Cord', desc: 'Overlapping, woven texture. Rhythmic and satisfying.', eq: 'Math.sin(x + Math.sin(y)) + Math.cos(y + Math.cos(x))' },
-            { id: 'thorns', title: 'Crystalline Thorns', desc: 'Dramatic concave spikes for pinpoint pressure stimulation.', eq: 'Math.sqrt(Math.abs(Math.sin(x) * Math.cos(y)))' },
-            { id: 'starburst', title: 'The Starburst', desc: 'Radiating ridges from the center. Good for rapid flicking.', eq: 'Math.sin(Math.atan2(y, x) * 12)' },
-            { id: 'bubble', title: 'Bubble Wrap', desc: 'Isolated round domes with negative resting space.', eq: 'Math.pow(Math.sin(x) * Math.sin(y), 2)' },
-            { id: 'pyramid', title: 'Stepped Pyramid', desc: 'Hard edges and flat tops.', eq: 'Math.floor(x) + Math.floor(y)' },
-            { id: 'linear', title: 'Linear Micro-Vibrations', desc: 'Predictable tracing path with subtle fine-grain vibration.', eq: 'x + 0.1 * Math.sin(y*5)' }
+            { id: 'ripple', title: 'The Water Ripple', eq: 'Math.sin(Math.sqrt(x*x + y*y))' },
+            { id: 'egg', title: 'The Egg Carton', eq: 'Math.sin(x) * Math.cos(y)' },
+            { id: 'saddle', title: 'The Saddle', eq: '(x*x - y*y) / 10' },
+            { id: 'sombrero', title: 'The Sombrero', eq: '10 * Math.sin(Math.sqrt(x*x + y*y)) / (Math.sqrt(x*x + y*y) + 0.001)' },
+            { id: 'waves', title: 'Intersecting Waves', eq: 'Math.sin(x) + Math.cos(y)' },
+            { id: 'knurling', title: 'Diamond Knurling', eq: 'Math.abs(Math.sin(x)) + Math.abs(Math.cos(y))' },
+            { id: 'spikes', title: 'Soft Spikes', eq: 'Math.sin(x * y)' },
+            { id: 'terrain', title: 'Rolling Terrain', eq: 'Math.sin(x) + 0.5 * Math.sin(2 * y) + 0.25 * Math.cos(3 * x)' },
+            { id: 'waffle', title: 'The Waffle Iron', eq: 'Math.cos(x) + Math.cos(y) + Math.cos(x+y)' },
+            { id: 'nodes', title: 'Massage Nodes', eq: '2 * Math.abs(Math.sin(x)) * Math.abs(Math.sin(y))' },
+            { id: 'fingerprint', title: 'The Fingerprint', eq: 'Math.sin(Math.sqrt(x*x + y*y) - Math.atan2(y, x) * 3)' },
+            { id: 'corduroy', title: 'Directional Corduroy', eq: 'Math.sin(2 * x + Math.sin(y))' },
+            { id: 'dimples', title: 'Dimpled Surface', eq: '-(Math.pow(Math.cos(x), 2) + Math.pow(Math.cos(y), 2))' },
+            { id: 'macromicro', title: 'Macro/Micro Dual-Feed', eq: 'Math.sin(x/2) * Math.cos(y/2) + 0.3 * Math.sin(x*4) * Math.cos(y*4)' },
+            { id: 'interference', title: 'Interference Static', eq: 'Math.sin((x * y) / 3) * Math.cos(x + y)' },
+            { id: 'glitch', title: 'Digital Glitch', eq: 'Math.floor(Math.sin(x) * 3) / 3 + Math.floor(Math.cos(y) * 3) / 3' },
+            { id: 'dragon', title: 'Dragon Scales', eq: '0.5 * Math.sin(x) + Math.abs(Math.sin(x+y))' },
+            { id: 'braided', title: 'Braided Cord', eq: 'Math.sin(x + Math.sin(y)) + Math.cos(y + Math.cos(x))' },
+            { id: 'thorns', title: 'Crystalline Thorns', eq: 'Math.sqrt(Math.abs(Math.sin(x) * Math.cos(y)))' },
+            { id: 'starburst', title: 'The Starburst', eq: 'Math.sin(Math.atan2(y, x) * 12)' },
+            { id: 'bubble', title: 'Bubble Wrap', eq: 'Math.pow(Math.sin(x) * Math.sin(y), 2)' },
+            { id: 'pyramid', title: 'Stepped Pyramid', eq: 'Math.floor(x) + Math.floor(y)' },
+            { id: 'linear', title: 'Linear Micro-Vibrations', eq: 'x + 0.1 * Math.sin(y*5)' }
+        ];
+
+        // Low-Frequency Base Patterns for the Combo Builder
+        const basePatterns = [
+            { title: 'Flat (Texture Only)', eq: '0' },
+            { title: 'Gentle Rolling Waves', eq: 'Math.sin(x/2) + Math.cos(y/2)' },
+            { title: 'Macro Dimples', eq: '-(Math.pow(Math.cos(x/2), 2) + Math.pow(Math.cos(y/2), 2))' },
+            { title: 'Terrain Hills', eq: 'Math.sin(x/2) + 0.5 * Math.sin(y)' },
+            { title: 'Saddle Curve', eq: '(x*x - y*y) / 15' },
+            { title: 'Large Stepped Pyramid', eq: 'Math.floor(x/2) + Math.floor(y/2)' }
+        ];
+
+        // High-Frequency Micro Textures for the Combo Builder
+        const microTextures = [
+            { title: 'Diamond Knurling', eq: 'Math.abs(Math.sin(x*4)) + Math.abs(Math.cos(y*4))' },
+            { title: 'Waffle Grid', eq: 'Math.cos(x*4) + Math.cos(y*4) + Math.cos((x+y)*4)' },
+            { title: 'Crystalline Thorns', eq: 'Math.sqrt(Math.abs(Math.sin(x*4) * Math.cos(y*4)))' },
+            { title: 'Digital Glitch Map', eq: 'Math.floor(Math.sin(x*5) * 3)/3 + Math.floor(Math.cos(y*5) * 3)/3' },
+            { title: 'Directional Grain', eq: 'Math.sin(x*8 + Math.sin(y*2))' },
+            { title: 'Bubble Wrap', eq: 'Math.pow(Math.sin(x*3) * Math.sin(y*3), 2)' }
         ];
 
         // --- 2. Three.js Setup ---
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
-        
         const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
-        camera.position.set(20, 25, 20);
+        camera.position.set(15, 20, 15);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(container.clientWidth, container.clientHeight);
@@ -292,7 +334,6 @@
         controls.enableDamping = true;
         controls.dampingFactor = 0.05;
 
-        // Lighting to highlight topography (Simulating PLA/Silk PLA sheen)
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
         scene.add(ambientLight);
 
@@ -307,22 +348,46 @@
         backLight.position.set(-10, 10, -10);
         scene.add(backLight);
 
-        // Grid
         const gridHelper = new THREE.GridHelper(40, 40, 0x444455, 0x222233);
-        gridHelper.position.y = -5; // Move grid slightly down
+        gridHelper.position.y = -5;
         scene.add(gridHelper);
 
-        // Material (Glossy to simulate Silk PLA)
         const material = new THREE.MeshStandardMaterial({ 
-            color: 0x4a90e2, 
-            roughness: 0.2, 
-            metalness: 0.1,
-            side: THREE.DoubleSide
+            color: 0x4a90e2, roughness: 0.2, metalness: 0.1, side: THREE.DoubleSide
         });
 
         let currentMesh = null;
 
-        // --- 3. Core Logic ---
+        // --- 3. Combo Builder Logic ---
+        function buildComboEquation() {
+            const baseEq = document.getElementById('base-select').value;
+            const microEq = document.getElementById('micro-select').value;
+            const intensity = document.getElementById('intensity').value;
+            const rotation = document.getElementById('rotation').value;
+
+            document.getElementById('intensity-val').textContent = intensity;
+            document.getElementById('rotation-val').textContent = rotation + '°';
+
+            // Constructing a safe, valid JS string to handle 2D rotation and combination
+            const eqStr = `(function(x, y) {
+    // 1. Calculate Rotation Matrix
+    const th = ${rotation} * Math.PI / 180;
+    const rx = x * Math.cos(th) - y * Math.sin(th);
+    const ry = x * Math.sin(th) + y * Math.cos(th);
+    
+    // 2. Define Components
+    const base = (x, y) => ${baseEq};
+    const micro = (x, y) => ${microEq};
+    
+    // 3. Combine: Base + (Rotated Micro * Intensity)
+    return base(x, y) + ${intensity} * micro(rx, ry);
+})(x, y)`;
+
+            document.getElementById('equation-input').value = eqStr;
+            generateSurface();
+        }
+
+        // --- 4. Core Render Logic ---
         function generateSurface() {
             const eqStr = document.getElementById('equation-input').value;
             const min = parseFloat(document.getElementById('bounds-min').value);
@@ -335,46 +400,30 @@
             }
 
             try {
-                // Safely create the dynamic function
                 const zFunc = new Function('x', 'y', 'return ' + eqStr + ';');
-                
-                // Test the function to ensure it doesn't crash
-                zFunc(0, 0); 
+                zFunc(0, 0); // Test execution
                 errorMsg.style.display = 'none';
 
                 const size = max - min;
-                const segments = 150; // High resolution for micro-textures
-                
-                // Use a PlaneGeometry
+                const segments = 150; // High resolution
                 const geometry = new THREE.PlaneGeometry(size, size, segments, segments);
-                
-                // Displace vertices based on the math function
                 const positions = geometry.attributes.position;
+                
                 for (let i = 0; i < positions.count; i++) {
-                    // X and Y in Three.js plane are local to the plane size
-                    // We need to map them back to the user's min/max bounds
                     const localX = positions.getX(i);
                     const localY = positions.getY(i);
-                    
                     const mappedX = mapRange(localX, -size/2, size/2, min, max);
                     const mappedY = mapRange(localY, -size/2, size/2, min, max);
 
                     const zVal = zFunc(mappedX, mappedY);
-                    
-                    // In Three.js, a standard plane lies on X/Y and faces +Z. 
-                    // We will set the Z displacement here.
-                    if(!isNaN(zVal)) {
-                        positions.setZ(i, zVal);
-                    }
+                    if(!isNaN(zVal)) positions.setZ(i, zVal);
                 }
 
                 geometry.computeVertexNormals();
-                
                 currentMesh = new THREE.Mesh(geometry, material);
-                currentMesh.rotation.x = -Math.PI / 2; // Lay flat
+                currentMesh.rotation.x = -Math.PI / 2;
                 currentMesh.castShadow = true;
                 currentMesh.receiveShadow = true;
-                
                 scene.add(currentMesh);
 
             } catch (e) {
@@ -390,79 +439,79 @@
         function exportSTL() {
             if (!currentMesh) return;
             const exporter = new STLExporter();
-            // Note: This exports a surface mesh. Slicers like Orca Slicer 
-            // can add thickness or treat it as a top surface modifier.
             const stlString = exporter.parse(scene);
-            
             const blob = new Blob([stlString], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.style.display = 'none';
             link.href = url;
-            link.download = 'Sensory_Collectible_Surface.stl';
+            link.download = 'Sensory_Combo_Surface.stl';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
         }
 
-        // --- 4. UI & Storage Management ---
-        const selectBox = document.getElementById('preset-select');
-        const descBox = document.getElementById('description-box');
-        const eqInput = document.getElementById('equation-input');
-        const savedList = document.getElementById('saved-list');
-
+        // --- 5. UI & Storage Initialization ---
         function initUI() {
-            // Populate Dropdown
-            equationLibrary.forEach(item => {
-                const opt = document.createElement('option');
-                opt.value = item.id;
-                opt.textContent = item.title;
-                selectBox.appendChild(opt);
-            });
+            // Populate Combo Builder Selects
+            const baseSelect = document.getElementById('base-select');
+            basePatterns.forEach(p => baseSelect.add(new Option(p.title, p.eq)));
+            
+            const microSelect = document.getElementById('micro-select');
+            microTextures.forEach(p => microSelect.add(new Option(p.title, p.eq)));
 
-            // Handle Dropdown Change
-            selectBox.addEventListener('change', (e) => {
-                const selected = equationLibrary.find(i => i.id === e.target.value);
-                if (selected) {
-                    descBox.textContent = selected.desc;
-                    eqInput.value = selected.eq;
+            // Populate Master Presets Select
+            const presetSelect = document.getElementById('preset-select');
+            equationLibrary.forEach(p => presetSelect.add(new Option(p.title, p.eq)));
+
+            // Event Listeners for Combo Builder (Auto-updates)
+            baseSelect.addEventListener('change', buildComboEquation);
+            microSelect.addEventListener('change', buildComboEquation);
+            document.getElementById('intensity').addEventListener('input', buildComboEquation);
+            document.getElementById('rotation').addEventListener('input', buildComboEquation);
+
+            // Event Listener for Manual Preset Override
+            presetSelect.addEventListener('change', (e) => {
+                if(e.target.value) {
+                    document.getElementById('equation-input').value = e.target.value;
                     generateSurface();
                 }
             });
 
-            // Initial load
-            descBox.textContent = equationLibrary[0].desc;
-            
             // Buttons
             document.getElementById('btn-render').addEventListener('click', generateSurface);
             document.getElementById('btn-export').addEventListener('click', exportSTL);
             document.getElementById('btn-save').addEventListener('click', saveToBank);
 
             renderSavedBank();
-            generateSurface();
+            
+            // Set initial state
+            baseSelect.selectedIndex = 1; // Gentle Rolling Waves
+            microSelect.selectedIndex = 0; // Diamond Knurling
+            buildComboEquation();
         }
 
         function saveToBank() {
             const nameInput = document.getElementById('save-name');
-            const name = nameInput.value.trim() || `Design ${Date.now().toString().slice(-4)}`;
-            const currentEq = eqInput.value;
+            const name = nameInput.value.trim() || `Combo Design ${Date.now().toString().slice(-4)}`;
+            const currentEq = document.getElementById('equation-input').value;
             const bMin = document.getElementById('bounds-min').value;
             const bMax = document.getElementById('bounds-max').value;
 
             const newSave = { id: Date.now(), name, eq: currentEq, min: bMin, max: bMax };
-            
-            let bank = JSON.parse(localStorage.getItem('sensoryBank') || '[]');
+            let bank = JSON.parse(localStorage.getItem('sensoryBankPro') || '[]');
             bank.push(newSave);
-            localStorage.setItem('sensoryBank', JSON.stringify(bank));
+            localStorage.setItem('sensoryBankPro', JSON.stringify(bank));
             
             nameInput.value = '';
             renderSavedBank();
         }
 
         function renderSavedBank() {
+            const savedList = document.getElementById('saved-list');
             savedList.innerHTML = '';
-            let bank = JSON.parse(localStorage.getItem('sensoryBank') || '[]');
+            let bank = JSON.parse(localStorage.getItem('sensoryBankPro') || '[]');
             
             bank.forEach(item => {
                 const div = document.createElement('div');
@@ -472,12 +521,11 @@
                 textSpan.textContent = item.name;
                 textSpan.style.flexGrow = '1';
                 
-                // Load design on click
                 textSpan.onclick = () => {
-                    eqInput.value = item.eq;
+                    document.getElementById('equation-input').value = item.eq;
                     document.getElementById('bounds-min').value = item.min;
                     document.getElementById('bounds-max').value = item.max;
-                    descBox.textContent = `Loaded Custom Design: ${item.name}`;
+                    document.getElementById('preset-select').value = ""; // clear preset
                     generateSurface();
                 };
 
@@ -487,7 +535,7 @@
                 delBtn.onclick = (e) => {
                     e.stopPropagation();
                     bank = bank.filter(b => b.id !== item.id);
-                    localStorage.setItem('sensoryBank', JSON.stringify(bank));
+                    localStorage.setItem('sensoryBankPro', JSON.stringify(bank));
                     renderSavedBank();
                 };
 
@@ -497,14 +545,12 @@
             });
         }
 
-        // --- 5. Render Loop ---
         function animate() {
             requestAnimationFrame(animate);
             controls.update();
             renderer.render(scene, camera);
         }
 
-        // Handle Resize
         window.addEventListener('resize', () => {
             camera.aspect = container.clientWidth / container.clientHeight;
             camera.updateProjectionMatrix();
