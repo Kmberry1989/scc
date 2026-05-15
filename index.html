@@ -93,8 +93,7 @@
             <div class="control-group">
                 <select id="format-select">
                     <option value="card">Standard Card (63x88mm)</option>
-                    <option value="coin">Sensory Coin (Ø50mm)</option>
-                    <option value="stone">Worry Stone (60x80mm Oval)</option>
+                    <option value="square">Square Card (63x63mm)</option>
                 </select>
             </div>
 
@@ -248,16 +247,11 @@
                     width = 63; height = 88;
                     baseGeo = new THREE.BoxGeometry(width, height, thickness, 100, 100, 1);
                     marginX = (width/2) - margin; marginY = (height/2) - margin;
-                } else if (format === 'coin') {
-                    width = 50; height = 50;
-                    baseGeo = new THREE.CylinderGeometry(25, 25, thickness, 120, 1);
-                    baseGeo.rotateX(Math.PI / 2); // Align Z up
-                } else if (format === 'stone') {
-                    width = 60; height = 80;
-                    baseGeo = new THREE.CylinderGeometry(30, 30, thickness, 120, 1);
-                    baseGeo.scale(1, 1, 80/60); // Squash into oval
-                    baseGeo.rotateX(Math.PI / 2);
-                }
+                } else if (format === 'square') {
+                    width = 63; height = 63;
+                    baseGeo = new THREE.BoxGeometry(width, height, thickness, 100, 100, 1);
+                    marginX = (width/2) - margin; marginY = (height/2) - margin;
+                } 
 
                 // 2. Apply Tactile Math to Top Face
                 const positions = baseGeo.attributes.position;
@@ -270,15 +264,8 @@
                     if (z > 1) {
                         let applyTexture = false;
                         
-                        if (format === 'card') {
+                        if (format === 'card' || format === 'square') {
                             if (Math.abs(x) < marginX && Math.abs(y) < marginY) applyTexture = true;
-                        } else if (format === 'coin') {
-                            const dist = Math.sqrt(x*x + y*y);
-                            if (dist < 25 - margin) applyTexture = true;
-                        } else if (format === 'stone') {
-                            const nx = x / 30; const ny = y / 40;
-                            const dist = Math.sqrt(nx*nx + ny*ny);
-                            if (dist < 0.85) applyTexture = true; 
                         }
 
                         if (applyTexture) {
