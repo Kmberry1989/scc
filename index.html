@@ -92,8 +92,8 @@
             <div class="section-title">1. Physical Format</div>
             <div class="control-group">
                 <select id="format-select">
+                    <option value="square" selected>Square Card (63x63mm)</option>
                     <option value="card">Standard Card (63x88mm)</option>
-                    <option value="square">Square Card (63x63mm)</option>
                 </select>
             </div>
 
@@ -235,50 +235,100 @@
 
             try {
                 const zFunc = new Function('x', 'y', 'return ' + eqStr + ';');
-                zFunc(0,0); // Test to ensure JS logic isn't broken
+                zFunc(0,0); // Test
                 errorMsg.style.display = 'none';
 
-                let baseGeo, width, height, marginX, marginY;
-                const thickness = 3; 
-                const margin = 4; // 4mm smooth border
+                let width = 63, height = 63; // Default Square
+                if (format === 'card') { height = 88; }
 
-                // 1. Generate Base Format Geometry
-                if (format === 'card') {
-                    width = 63; height = 88;
-                    baseGeo = new THREE.BoxGeometry(width, height, thickness, 100, 100, 1);
-                    marginX = (width/2) - margin; marginY = (height/2) - margin;
-                } else if (format === 'square') {
-                    width = 63; height = 63;
-                    baseGeo = new THREE.BoxGeometry(width, height, thickness, 100, 100, 1);
-                    marginX = (width/2) - margin; marginY = (height/2) - margin;
-                } 
+                const thickness = 3.0;
+                
+                // Design parameters
+                const radius = 6.0;      // Corner rounding radius
+                const topBevel = 1.2;    // Top edge chamfer
+                const botBevel = 0.8;    // Bottom edge chamfer (prevents elephant's foot)
+                const margin = topBevel + 2.5; // Flat rim before texture starts
 
-                // 2. Apply Tactile Math to Top Face
+                // Create a dense box geometry
+                const baseGeo = new THREE.BoxGeometry(width, height, thickness, 150, 150, 1);
                 const positions = baseGeo.attributes.position;
+
+                // Center points for the corner radius calculation
+                const cx = (width / 2) - radius;
+                const cy = (height / 2) - radius;
+
                 for (let i = 0; i < positions.count; i++) {
-                    const x = positions.getX(i);
-                    const y = positions.getY(i);
-                    const z = positions.getZ(i);
+                    let x = positions.getX(i);
+                    let y = positions.getY(i);
+                    let z = positions.getZ(i);
 
-                    // If vertex is on the top face (Z > 0)
-                    if (z > 1) {
-                        let applyTexture = false;
+                    // 1. Mathematically bend the outer grid into rounded corners (Squircle Mapping)
+                    let ax = Math.abs(x);
+                    let ay = Math.abs(y);
+                    let mappedX = x;
+                    let mappedY = y;
+
+                    // If vertex is in the corner zone
+                    if (ax > cx && ay > cy) {
+                        let u = Math.min(1, Math.max(0, (ax - cx) / radius));
+                        let v = Math.min(1, Math.max(0, (ay - cy) / radius));
                         
-                        if (format === 'card' || format === 'square') {
-                            if (Math.abs(x) < marginX && Math.abs(y) < marginY) applyTexture = true;
-                        }
+                        // Map square grid to circular arc
+                        let u_new = u * Math.sqrt(1 - (v * v) / 2);
+                        let v_new = v * Math.sqrt(1 - (u * u) / 2);
+                        
+                        mappedX = Math.sign(x) * (cx + u_new * radius);
+                        mappedY = Math.sign(y) * (cy + v_new * radius);
+                    }
 
-                        if (applyTexture) {
-                            const mathX = (x / (width/2)) * 10;
-                            const mathY = (y / (height/2)) * 10;
+                    positions.setX(i, mappedX);
+                    positions.setY(i, mappedY);
+
+                    // 2. Calculate Distance (D) to the new rounded boundary
+                    let D = 0;
+                    let nax = Math.abs(mappedX);
+                    let nay = Math.abs(mappedY);
+                    
+                    if (nax > cx && nay > cy) {
+                        D = radius - Math.sqrt(Math.pow(nax - cx, 2) + Math.pow(nay - cy, 2));
+                    } else if (nax > cx) {
+                        D = width / 2 - nax;
+                    } else if (nay > cy) {
+                        D = height / 2 - nay;
+                    } else {
+                        D = Math.min(width / 2 - nax, height / 2 - nay);
+                    }
+                    
+                    if (D < 0) D = 0; // Fix edge precision
+
+                    // 3. Apply Bevels and Texture
+                    let newZ = z;
+
+                    if (z > 0.1) {
+                        // Top Face: Apply Bevel
+                        if (D < topBevel) {
+                            newZ = z - (topBevel - D);
+                        }
+                        
+                        // Top Face: Apply Math Texture inside the margin
+                        if (D > margin) {
+                            // Scale coordinates for the math function
+                            const mathX = (mappedX / (width/2)) * 10;
+                            const mathY = (mappedY / (height/2)) * 10;
                             const zVal = zFunc(mathX, mathY);
-                            if(!isNaN(zVal)) positions.setZ(i, z + zVal);
+                            if(!isNaN(zVal)) newZ += zVal;
+                        }
+                    } else if (z < -0.1) {
+                        // Bottom Face: Apply smaller bevel to combat print curling
+                        if (D < botBevel) {
+                            newZ = z + (botBevel - D);
                         }
                     }
-                }
-                baseGeo.computeVertexNormals();
 
-                // 3. Create the mesh
+                    positions.setZ(i, newZ);
+                }
+                
+                baseGeo.computeVertexNormals();
                 currentMesh = new THREE.Mesh(baseGeo, material);
                 scene.add(currentMesh);
 
@@ -309,7 +359,7 @@
 })(x, y)`;
 
             document.getElementById('equation-input').value = eqStr;
-            document.getElementById('preset-select').value = ""; // Clear preset selection
+            document.getElementById('preset-select').value = "";
             generateSurface();
         }
 
@@ -323,24 +373,20 @@
         }
 
         function initUI() {
-            // Populate Equation Library Presets
             const presetSelect = document.getElementById('preset-select');
             equationLibrary.forEach(p => presetSelect.add(new Option(p.title, p.eq)));
 
-            // Populate Combo Builder Dropdowns
             const baseSelect = document.getElementById('base-select');
             basePatterns.forEach(p => baseSelect.add(new Option(p.title, p.eq)));
             
             const microSelect = document.getElementById('micro-select');
             microTextures.forEach(p => microSelect.add(new Option(p.title, p.eq)));
 
-            // Event Listeners: Combo Builder
             baseSelect.addEventListener('change', buildComboEquation);
             microSelect.addEventListener('change', buildComboEquation);
             document.getElementById('intensity').addEventListener('input', buildComboEquation);
             document.getElementById('rotation').addEventListener('input', buildComboEquation);
             
-            // Event Listener: Preset Selection
             presetSelect.addEventListener('change', (e) => {
                 if(e.target.value) {
                     document.getElementById('equation-input').value = e.target.value;
@@ -348,7 +394,6 @@
                 }
             });
 
-            // Event Listeners: Format & Export
             document.getElementById('format-select').addEventListener('change', generateSurface);
             document.getElementById('btn-render').addEventListener('click', generateSurface);
             
@@ -367,13 +412,11 @@
                 buildComboEquation();
             });
 
-            // Initial Build
             baseSelect.selectedIndex = 1; 
             microSelect.selectedIndex = 0;
             buildComboEquation();
         }
 
-        // --- Render Loop ---
         function animate() {
             requestAnimationFrame(animate);
             controls.update();
