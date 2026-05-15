@@ -150,7 +150,6 @@
         import { STLExporter } from 'three/addons/exporters/STLExporter.js';
         import { FontLoader } from 'three/addons/loaders/FontLoader.js';
         import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
-        import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 
         // --- Data Banks ---
         const basePatterns = [
@@ -217,11 +216,17 @@
             const editionName = document.getElementById('edition-name').value;
             const eqStr = document.getElementById('equation-input').value;
 
-            if (currentMesh) scene.remove(currentMesh);
+            // Safely clear old meshes to prevent memory leaks
+            if (currentMesh) {
+                scene.remove(currentMesh);
+                currentMesh.traverse((child) => {
+                    if (child.isMesh) child.geometry.dispose();
+                });
+            }
 
             try {
                 const zFunc = new Function('x', 'y', 'return ' + eqStr + ';');
-                zFunc(0,0); // Test
+                zFunc(0,0); // Test to ensure JS logic isn't broken
                 errorMsg.style.display = 'none';
 
                 let baseGeo, width, height, marginX, marginY;
@@ -261,15 +266,12 @@
                             const dist = Math.sqrt(x*x + y*y);
                             if (dist < 25 - margin) applyTexture = true;
                         } else if (format === 'stone') {
-                            // Normalized distance for ellipse
                             const nx = x / 30; const ny = y / 40;
                             const dist = Math.sqrt(nx*nx + ny*ny);
-                            // Approx margin calculation for oval
                             if (dist < 0.85) applyTexture = true; 
                         }
 
                         if (applyTexture) {
-                            // Scale coordinates down to match previous math bounds (-10 to 10 approx)
                             const mathX = (x / (width/2)) * 10;
                             const mathY = (y / (height/2)) * 10;
                             const zVal = zFunc(mathX, mathY);
@@ -279,35 +281,36 @@
                 }
                 baseGeo.computeVertexNormals();
 
-                // 3. Generate Branding Text (Back of Card)
-                const textGeos = [];
-                
-                // Company Logo
+                // 3. Create a Group to hold overlapping meshes safely (Bypasses rigid attribute rules)
+                currentMesh = new THREE.Group();
+                currentMesh.add(new THREE.Mesh(baseGeo, material));
+
+                // 4. Generate Branding Text (Using 'depth' instead of 'height' for modern Three.js)
                 const logoGeo = new TextGeometry('TOUCHY SUBJECTS LLC', {
-                    font: loadedFont, size: 3.5, height: 0.5, curveSegments: 3
+                    font: loadedFont, size: 3.5, depth: 0.5, curveSegments: 3
                 });
                 logoGeo.center();
                 logoGeo.translate(0, 10, -thickness/2); // Position on bottom, facing down
                 logoGeo.rotateX(Math.PI); // Flip so it prints correctly on bed
-                textGeos.push(logoGeo);
+                currentMesh.add(new THREE.Mesh(logoGeo, material));
 
-                // Edition Name
-                const nameGeo = new TextGeometry(editionName.toUpperCase(), {
-                    font: loadedFont, size: 2.5, height: 0.5, curveSegments: 3
-                });
-                nameGeo.center();
-                nameGeo.translate(0, -10, -thickness/2);
-                nameGeo.rotateX(Math.PI);
-                textGeos.push(nameGeo);
+                // Only render custom text if input isn't empty
+                if (editionName.trim().length > 0) {
+                    const nameGeo = new TextGeometry(editionName.trim().toUpperCase(), {
+                        font: loadedFont, size: 2.5, depth: 0.5, curveSegments: 3
+                    });
+                    nameGeo.center();
+                    nameGeo.translate(0, -10, -thickness/2);
+                    nameGeo.rotateX(Math.PI);
+                    currentMesh.add(new THREE.Mesh(nameGeo, material));
+                }
 
-                // 4. Merge Everything into one Solid Manifold STL
-                const finalGeo = BufferGeometryUtils.mergeGeometries([baseGeo, ...textGeos]);
-
-                currentMesh = new THREE.Mesh(finalGeo, material);
+                // Add grouped items to the scene for viewing and exporting
                 scene.add(currentMesh);
 
             } catch (e) {
                 console.error(e);
+                errorMsg.textContent = "Logic Error: " + e.message;
                 errorMsg.style.display = 'block';
             }
         }
@@ -317,32 +320,27 @@
             const format = document.getElementById('format-select').value;
             let slipGeo;
             
-            // Generate a solid block slightly larger than the format. 
-            // The slicer's "Vase Mode" will hollow it out perfectly.
             const height = 90; // Tall enough to cover the item
             
             if (format === 'card') {
                 slipGeo = new THREE.BoxGeometry(65, 91, height, 50, 50, 50);
             } else if (format === 'coin') {
                 slipGeo = new THREE.CylinderGeometry(26, 26, height, 64, 50);
-                slipGeo.rotateX(Math.PI / 2); // Align for math processing
+                slipGeo.rotateX(Math.PI / 2);
             } else if (format === 'stone') {
                 slipGeo = new THREE.CylinderGeometry(31, 31, height, 64, 50);
                 slipGeo.scale(1, 1, 82/62);
                 slipGeo.rotateX(Math.PI / 2);
             }
 
-            // Add a wavy grip texture to the OUTSIDE walls
             const positions = slipGeo.attributes.position;
             for (let i = 0; i < positions.count; i++) {
                 const x = positions.getX(i);
                 const y = positions.getY(i);
                 const z = positions.getZ(i);
 
-                // For box, displace X and Y faces
                 if (format === 'card') {
                     if (Math.abs(x) > 32 || Math.abs(y) > 45) {
-                        // Apply sine wave based on Z height for ribbed grip
                         const wave = Math.sin(z * 0.5) * 0.5;
                         if (x > 0) positions.setX(i, x + wave);
                         else if (x < 0) positions.setX(i, x - wave);
@@ -351,11 +349,10 @@
                         else if (y < 0) positions.setY(i, y - wave);
                     }
                 } else {
-                    // For cylinders, displace radial edge
                     const dist = Math.sqrt(x*x + y*y);
-                    if (dist > 25) { // Roughly outer edge
+                    if (dist > 25) {
                         const angle = Math.atan2(y, x);
-                        const wave = Math.sin(z * 0.5) * 0.5; // Vertical ribs
+                        const wave = Math.sin(z * 0.5) * 0.5; 
                         positions.setX(i, x + Math.cos(angle) * wave);
                         positions.setY(i, y + Math.sin(angle) * wave);
                     }
@@ -363,7 +360,6 @@
             }
             slipGeo.computeVertexNormals();
             
-            // Export directly (no need to render to scene)
             const exportMesh = new THREE.Mesh(slipGeo, material);
             const exporter = new STLExporter();
             const stlString = exporter.parse(exportMesh);
@@ -409,7 +405,6 @@
             const microSelect = document.getElementById('micro-select');
             microTextures.forEach(p => microSelect.add(new Option(p.title, p.eq)));
 
-            // Events
             baseSelect.addEventListener('change', buildComboEquation);
             microSelect.addEventListener('change', buildComboEquation);
             document.getElementById('intensity').addEventListener('input', buildComboEquation);
@@ -421,7 +416,7 @@
             
             document.getElementById('btn-export').addEventListener('click', () => {
                 const exporter = new STLExporter();
-                const stlString = exporter.parse(scene);
+                const stlString = exporter.parse(scene); // Parses the entire Group perfectly
                 const format = document.getElementById('format-select').value;
                 triggerDownload(stlString, `TouchySubjects_${format}_Solid.stl`);
             });
@@ -442,7 +437,6 @@
                 buildComboEquation();
             });
 
-            // Initial Build
             baseSelect.selectedIndex = 1; 
             microSelect.selectedIndex = 0;
             buildComboEquation();
