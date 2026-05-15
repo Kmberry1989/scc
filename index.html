@@ -3,181 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sensory Collectible Creator - Pro</title>
+    <title>Touchy Subjects LLC - Production Pipeline</title>
     <style>
         :root {
-            --bg-color: #1e1e24;
-            --panel-bg: #2b2b36;
+            --bg-color: #1a1a1f;
+            --panel-bg: #22222a;
             --text-main: #f0f0f5;
-            --text-muted: #a0a0b0;
-            --accent: #4a90e2;
-            --accent-hover: #357abd;
-            --border: #404050;
-            --panel-width: 420px;
+            --text-muted: #8a8a9e;
+            --accent: #d84b7b; /* Touchy Subjects Brand Accent */
+            --accent-hover: #b83a60;
+            --border: #333340;
+            --panel-width: 450px;
         }
 
         body {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            height: 100vh;
+            margin: 0; padding: 0; display: flex; height: 100vh;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            overflow: hidden;
+            background-color: var(--bg-color); color: var(--text-main); overflow: hidden;
         }
 
         #sidebar {
-            width: var(--panel-width);
-            background-color: var(--panel-bg);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.3);
-            z-index: 10;
+            width: var(--panel-width); background-color: var(--panel-bg);
+            border-right: 1px solid var(--border); display: flex; flex-direction: column;
+            box-shadow: 2px 0 15px rgba(0,0,0,0.5); z-index: 10;
         }
 
-        .panel-header {
-            padding: 15px 20px;
-            background-color: rgba(0,0,0,0.2);
-            border-bottom: 1px solid var(--border);
-        }
+        .panel-header { padding: 15px 20px; background-color: #17171d; border-bottom: 1px solid var(--border); }
+        .panel-header h1 { margin: 0; font-size: 1.2rem; color: var(--accent); letter-spacing: 1px; }
+        .panel-header p { margin: 2px 0 0 0; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
 
-        .panel-header h1 {
-            margin: 0;
-            font-size: 1.2rem;
-            color: var(--text-main);
-        }
-
-        .panel-content {
-            padding: 20px;
-            overflow-y: auto;
-            flex-grow: 1;
-        }
+        .panel-content { padding: 20px; overflow-y: auto; flex-grow: 1; }
 
         .section-title {
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--accent);
-            margin: 25px 0 10px 0;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 5px;
+            font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;
+            color: var(--text-muted); margin: 20px 0 10px 0; border-bottom: 1px solid var(--border); padding-bottom: 5px;
         }
-        
         .section-title:first-child { margin-top: 0; }
 
-        .control-group { margin-bottom: 15px; }
-
-        label {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 6px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-muted);
-        }
+        .control-group { margin-bottom: 12px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        
+        label { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 0.8rem; font-weight: 600; color: #d0d0df; }
 
         select, input[type="text"], input[type="number"], textarea {
-            width: 100%;
-            padding: 8px 10px;
-            background-color: #1a1a20;
-            border: 1px solid var(--border);
-            color: var(--text-main);
-            border-radius: 6px;
-            font-family: monospace;
-            box-sizing: border-box;
-            font-size: 0.9rem;
+            width: 100%; padding: 8px 10px; background-color: #131318; border: 1px solid var(--border);
+            color: var(--text-main); border-radius: 4px; font-family: monospace; box-sizing: border-box; font-size: 0.85rem;
         }
-
-        textarea {
-            resize: vertical;
-            min-height: 80px;
-            font-size: 0.8rem;
-            line-height: 1.3;
-            background-color: #111115;
-            color: #88ff88;
-        }
-
+        textarea { resize: vertical; min-height: 60px; color: #a4b4ff; }
         select { cursor: pointer; font-family: inherit; }
-
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-        input[type="range"] {
-            width: 100%;
-            margin: 5px 0;
-            cursor: pointer;
-        }
+        input[type="range"] { width: 100%; margin: 5px 0; cursor: pointer; accent-color: var(--accent); }
 
         button {
-            width: 100%;
-            padding: 12px;
-            background-color: var(--accent);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background-color 0.2s;
-            margin-bottom: 10px;
+            width: 100%; padding: 10px; background-color: var(--accent); color: white; border: none;
+            border-radius: 4px; cursor: pointer; font-weight: bold; transition: background-color 0.2s; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.85rem;
         }
-
         button:hover { background-color: var(--accent-hover); }
-        
-        button.secondary {
-            background-color: transparent;
-            border: 1px solid var(--accent);
-            color: var(--accent);
+        button.secondary { background-color: #2a2a35; border: 1px solid var(--border); color: var(--text-main); }
+        button.secondary:hover { background-color: #353545; }
+        button.action { background-color: #4a90e2; }
+        button.action:hover { background-color: #357abd; }
+
+        #canvas-container { flex-grow: 1; position: relative; background: radial-gradient(circle at center, #252530 0%, #101015 100%); }
+        #loading-msg, #error-msg {
+            position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+            padding: 8px 16px; border-radius: 4px; display: none; z-index: 20; font-weight: bold; font-size: 0.9rem;
         }
-        button.secondary:hover { background-color: rgba(74, 144, 226, 0.1); }
-
-        #saved-bank { margin-top: 10px; }
-
-        .saved-item {
-            background-color: #1a1a20;
-            padding: 8px 10px;
-            border-radius: 6px;
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            border: 1px solid transparent;
-            font-size: 0.9rem;
-        }
-
-        .saved-item:hover { border-color: var(--accent); }
-
-        .delete-btn {
-            background: none;
-            border: none;
-            color: #ff4a4a;
-            width: auto;
-            padding: 0 5px;
-            margin: 0;
-            font-size: 1.2rem;
-        }
-        .delete-btn:hover { background: none; color: #ff7a7a; }
-
-        #canvas-container {
-            flex-grow: 1;
-            position: relative;
-            background: radial-gradient(circle at center, #2a2a35 0%, #101015 100%);
-        }
-
-        #error-msg {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: rgba(255, 74, 74, 0.9);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 6px;
-            display: none;
-            z-index: 20;
-            font-weight: bold;
-        }
+        #error-msg { background-color: rgba(255, 74, 74, 0.9); color: white; }
+        #loading-msg { background-color: rgba(74, 144, 226, 0.9); color: white; display: block; }
     </style>
     
     <script type="importmap">
@@ -193,17 +85,27 @@
 
     <div id="sidebar">
         <div class="panel-header">
-            <h1>Sensory Collectible Creator</h1>
+            <h1>TOUCHY SUBJECTS LLC</h1>
+            <p>Sensory Production Pipeline</p>
         </div>
         <div class="panel-content">
             
-            <div class="section-title">Combo Builder</div>
+            <div class="section-title">1. Standardized Format</div>
+            <div class="control-group">
+                <select id="format-select">
+                    <option value="card">Standard Card (63x88mm)</option>
+                    <option value="coin">Sensory Coin (Ø50mm)</option>
+                    <option value="stone">Worry Stone (60x80mm Oval)</option>
+                </select>
+            </div>
+
+            <div class="section-title">2. Tactile Generator</div>
+            <button id="btn-gacha" class="secondary">🎲 Randomize (Gacha Mechanics)</button>
             
             <div class="control-group">
                 <label>Base Pattern (Macro)</label>
                 <select id="base-select"></select>
             </div>
-            
             <div class="control-group">
                 <label>Micro Detail (Texture)</label>
                 <select id="micro-select"></select>
@@ -212,7 +114,7 @@
             <div class="control-group grid-2">
                 <div>
                     <label>Intensity <span id="intensity-val">0.5</span></label>
-                    <input type="range" id="intensity" min="0" max="2" step="0.05" value="0.5">
+                    <input type="range" id="intensity" min="0" max="3" step="0.05" value="0.8">
                 </div>
                 <div>
                     <label>Rotation <span id="rotation-val">45°</span></label>
@@ -220,145 +122,255 @@
                 </div>
             </div>
 
-            <div class="section-title">Raw Mathematical Logic</div>
-            
-            <div class="control-group">
-                <label>Presets / Single Equations</label>
-                <select id="preset-select">
-                    <option value="">-- Load a classic preset --</option>
-                </select>
-            </div>
-
-            <div class="control-group">
-                <label>Z = f(x, y) JavaScript</label>
+            <div class="control-group" style="display:none;">
+                <label>Z = f(x, y) Core Logic</label>
                 <textarea id="equation-input"></textarea>
             </div>
 
-            <div class="control-group grid-2">
-                <div>
-                    <label>Bounds (Min)</label>
-                    <input type="number" id="bounds-min" value="-10" step="1">
-                </div>
-                <div>
-                    <label>Bounds (Max)</label>
-                    <input type="number" id="bounds-max" value="10" step="1">
-                </div>
+            <div class="section-title">3. Branding & Export</div>
+            <div class="control-group">
+                <label>Edition Name (Embossed on back)</label>
+                <input type="text" id="edition-name" value="Series 1 Proto">
             </div>
 
-            <button id="btn-render">Force Render</button>
-            <button id="btn-export" class="secondary">Export STL</button>
-
-            <div class="section-title">Design Bank</div>
-            <div id="saved-bank">
-                <div class="control-group grid-2">
-                    <input type="text" id="save-name" placeholder="Name design...">
-                    <button id="btn-save" style="margin-bottom:0;">Save</button>
-                </div>
-                <div id="saved-list"></div>
-            </div>
+            <button id="btn-render">Refresh Preview</button>
+            <button id="btn-export" class="action">💾 Export Solid Collectible (.STL)</button>
+            <button id="btn-export-box" class="secondary">📦 Export Vase-Mode Slipcase (.STL)</button>
         </div>
     </div>
 
     <div id="canvas-container">
-        <div id="error-msg">Invalid JavaScript Equation</div>
+        <div id="loading-msg">Loading Fonts & Systems...</div>
+        <div id="error-msg">Invalid Geometry Logic</div>
     </div>
 
     <script type="module">
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         import { STLExporter } from 'three/addons/exporters/STLExporter.js';
+        import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+        import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
+        import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 
-        // --- 1. Data Banks ---
-        
-        // Full Library for Presets
-        const equationLibrary = [
-            { id: 'ripple', title: 'The Water Ripple', eq: 'Math.sin(Math.sqrt(x*x + y*y))' },
-            { id: 'egg', title: 'The Egg Carton', eq: 'Math.sin(x) * Math.cos(y)' },
-            { id: 'saddle', title: 'The Saddle', eq: '(x*x - y*y) / 10' },
-            { id: 'sombrero', title: 'The Sombrero', eq: '10 * Math.sin(Math.sqrt(x*x + y*y)) / (Math.sqrt(x*x + y*y) + 0.001)' },
-            { id: 'waves', title: 'Intersecting Waves', eq: 'Math.sin(x) + Math.cos(y)' },
-            { id: 'knurling', title: 'Diamond Knurling', eq: 'Math.abs(Math.sin(x)) + Math.abs(Math.cos(y))' },
-            { id: 'spikes', title: 'Soft Spikes', eq: 'Math.sin(x * y)' },
-            { id: 'terrain', title: 'Rolling Terrain', eq: 'Math.sin(x) + 0.5 * Math.sin(2 * y) + 0.25 * Math.cos(3 * x)' },
-            { id: 'waffle', title: 'The Waffle Iron', eq: 'Math.cos(x) + Math.cos(y) + Math.cos(x+y)' },
-            { id: 'nodes', title: 'Massage Nodes', eq: '2 * Math.abs(Math.sin(x)) * Math.abs(Math.sin(y))' },
-            { id: 'fingerprint', title: 'The Fingerprint', eq: 'Math.sin(Math.sqrt(x*x + y*y) - Math.atan2(y, x) * 3)' },
-            { id: 'corduroy', title: 'Directional Corduroy', eq: 'Math.sin(2 * x + Math.sin(y))' },
-            { id: 'dimples', title: 'Dimpled Surface', eq: '-(Math.pow(Math.cos(x), 2) + Math.pow(Math.cos(y), 2))' },
-            { id: 'macromicro', title: 'Macro/Micro Dual-Feed', eq: 'Math.sin(x/2) * Math.cos(y/2) + 0.3 * Math.sin(x*4) * Math.cos(y*4)' },
-            { id: 'interference', title: 'Interference Static', eq: 'Math.sin((x * y) / 3) * Math.cos(x + y)' },
-            { id: 'glitch', title: 'Digital Glitch', eq: 'Math.floor(Math.sin(x) * 3) / 3 + Math.floor(Math.cos(y) * 3) / 3' },
-            { id: 'dragon', title: 'Dragon Scales', eq: '0.5 * Math.sin(x) + Math.abs(Math.sin(x+y))' },
-            { id: 'braided', title: 'Braided Cord', eq: 'Math.sin(x + Math.sin(y)) + Math.cos(y + Math.cos(x))' },
-            { id: 'thorns', title: 'Crystalline Thorns', eq: 'Math.sqrt(Math.abs(Math.sin(x) * Math.cos(y)))' },
-            { id: 'starburst', title: 'The Starburst', eq: 'Math.sin(Math.atan2(y, x) * 12)' },
-            { id: 'bubble', title: 'Bubble Wrap', eq: 'Math.pow(Math.sin(x) * Math.sin(y), 2)' },
-            { id: 'pyramid', title: 'Stepped Pyramid', eq: 'Math.floor(x) + Math.floor(y)' },
-            { id: 'linear', title: 'Linear Micro-Vibrations', eq: 'x + 0.1 * Math.sin(y*5)' }
-        ];
-
-        // Low-Frequency Base Patterns for the Combo Builder
+        // --- Data Banks ---
         const basePatterns = [
             { title: 'Flat (Texture Only)', eq: '0' },
             { title: 'Gentle Rolling Waves', eq: 'Math.sin(x/2) + Math.cos(y/2)' },
             { title: 'Macro Dimples', eq: '-(Math.pow(Math.cos(x/2), 2) + Math.pow(Math.cos(y/2), 2))' },
             { title: 'Terrain Hills', eq: 'Math.sin(x/2) + 0.5 * Math.sin(y)' },
             { title: 'Saddle Curve', eq: '(x*x - y*y) / 15' },
-            { title: 'Large Stepped Pyramid', eq: 'Math.floor(x/2) + Math.floor(y/2)' }
+            { title: 'Pyramid Steps', eq: 'Math.floor(x/2) + Math.floor(y/2)' }
         ];
 
-        // High-Frequency Micro Textures for the Combo Builder
         const microTextures = [
             { title: 'Diamond Knurling', eq: 'Math.abs(Math.sin(x*4)) + Math.abs(Math.cos(y*4))' },
             { title: 'Waffle Grid', eq: 'Math.cos(x*4) + Math.cos(y*4) + Math.cos((x+y)*4)' },
             { title: 'Crystalline Thorns', eq: 'Math.sqrt(Math.abs(Math.sin(x*4) * Math.cos(y*4)))' },
-            { title: 'Digital Glitch Map', eq: 'Math.floor(Math.sin(x*5) * 3)/3 + Math.floor(Math.cos(y*5) * 3)/3' },
+            { title: 'Glitch Mapping', eq: 'Math.floor(Math.sin(x*5) * 3)/3 + Math.floor(Math.cos(y*5) * 3)/3' },
             { title: 'Directional Grain', eq: 'Math.sin(x*8 + Math.sin(y*2))' },
-            { title: 'Bubble Wrap', eq: 'Math.pow(Math.sin(x*3) * Math.sin(y*3), 2)' }
+            { title: 'Bubble Wrap Domes', eq: 'Math.pow(Math.sin(x*3) * Math.sin(y*3), 2)' },
+            { title: 'Smooth Ripple', eq: 'Math.sin(Math.sqrt(x*x + y*y)*3)' }
         ];
 
-        // --- 2. Three.js Setup ---
+        // --- Three.js Setup ---
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
-        camera.position.set(15, 20, 15);
+        camera.position.set(0, -60, 60);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(container.clientWidth, container.clientHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         container.appendChild(renderer.domElement);
 
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
 
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
-        scene.add(ambientLight);
-
+        // Lighting
+        scene.add(new THREE.AmbientLight(0xffffff, 0.5));
         const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
-        dirLight.position.set(10, 20, 10);
-        dirLight.castShadow = true;
-        dirLight.shadow.mapSize.width = 2048;
-        dirLight.shadow.mapSize.height = 2048;
+        dirLight.position.set(20, -20, 40);
         scene.add(dirLight);
 
-        const backLight = new THREE.DirectionalLight(0x88bbff, 0.5);
-        backLight.position.set(-10, 10, -10);
-        scene.add(backLight);
-
-        const gridHelper = new THREE.GridHelper(40, 40, 0x444455, 0x222233);
-        gridHelper.position.y = -5;
-        scene.add(gridHelper);
-
+        // Standard PLA/Silk Material
         const material = new THREE.MeshStandardMaterial({ 
-            color: 0x4a90e2, roughness: 0.2, metalness: 0.1, side: THREE.DoubleSide
+            color: 0xd84b7b, roughness: 0.3, metalness: 0.2 
         });
 
         let currentMesh = null;
+        let loadedFont = null;
 
-        // --- 3. Combo Builder Logic ---
+        // Load Font for Branding
+        const loader = new FontLoader();
+        loader.load('https://unpkg.com/three@0.160.0/examples/fonts/helvetiker_bold.typeface.json', function (font) {
+            loadedFont = font;
+            document.getElementById('loading-msg').style.display = 'none';
+            initUI();
+        });
+
+        // --- Core Generator ---
+        function generateSurface() {
+            if (!loadedFont) return;
+            const errorMsg = document.getElementById('error-msg');
+            const format = document.getElementById('format-select').value;
+            const editionName = document.getElementById('edition-name').value;
+            const eqStr = document.getElementById('equation-input').value;
+
+            if (currentMesh) scene.remove(currentMesh);
+
+            try {
+                const zFunc = new Function('x', 'y', 'return ' + eqStr + ';');
+                zFunc(0,0); // Test
+                errorMsg.style.display = 'none';
+
+                let baseGeo, width, height, marginX, marginY;
+                const thickness = 3; 
+                const margin = 4; // 4mm smooth border
+
+                // 1. Generate Base Format Geometry
+                if (format === 'card') {
+                    width = 63; height = 88;
+                    baseGeo = new THREE.BoxGeometry(width, height, thickness, 100, 100, 1);
+                    marginX = (width/2) - margin; marginY = (height/2) - margin;
+                } else if (format === 'coin') {
+                    width = 50; height = 50;
+                    baseGeo = new THREE.CylinderGeometry(25, 25, thickness, 120, 1);
+                    baseGeo.rotateX(Math.PI / 2); // Align Z up
+                } else if (format === 'stone') {
+                    width = 60; height = 80;
+                    baseGeo = new THREE.CylinderGeometry(30, 30, thickness, 120, 1);
+                    baseGeo.scale(1, 1, 80/60); // Squash into oval
+                    baseGeo.rotateX(Math.PI / 2);
+                }
+
+                // 2. Apply Tactile Math to Top Face
+                const positions = baseGeo.attributes.position;
+                for (let i = 0; i < positions.count; i++) {
+                    const x = positions.getX(i);
+                    const y = positions.getY(i);
+                    const z = positions.getZ(i);
+
+                    // If vertex is on the top face (Z > 0)
+                    if (z > 1) {
+                        let applyTexture = false;
+                        
+                        if (format === 'card') {
+                            if (Math.abs(x) < marginX && Math.abs(y) < marginY) applyTexture = true;
+                        } else if (format === 'coin') {
+                            const dist = Math.sqrt(x*x + y*y);
+                            if (dist < 25 - margin) applyTexture = true;
+                        } else if (format === 'stone') {
+                            // Normalized distance for ellipse
+                            const nx = x / 30; const ny = y / 40;
+                            const dist = Math.sqrt(nx*nx + ny*ny);
+                            // Approx margin calculation for oval
+                            if (dist < 0.85) applyTexture = true; 
+                        }
+
+                        if (applyTexture) {
+                            // Scale coordinates down to match previous math bounds (-10 to 10 approx)
+                            const mathX = (x / (width/2)) * 10;
+                            const mathY = (y / (height/2)) * 10;
+                            const zVal = zFunc(mathX, mathY);
+                            if(!isNaN(zVal)) positions.setZ(i, z + zVal);
+                        }
+                    }
+                }
+                baseGeo.computeVertexNormals();
+
+                // 3. Generate Branding Text (Back of Card)
+                const textGeos = [];
+                
+                // Company Logo
+                const logoGeo = new TextGeometry('TOUCHY SUBJECTS LLC', {
+                    font: loadedFont, size: 3.5, height: 0.5, curveSegments: 3
+                });
+                logoGeo.center();
+                logoGeo.translate(0, 10, -thickness/2); // Position on bottom, facing down
+                logoGeo.rotateX(Math.PI); // Flip so it prints correctly on bed
+                textGeos.push(logoGeo);
+
+                // Edition Name
+                const nameGeo = new TextGeometry(editionName.toUpperCase(), {
+                    font: loadedFont, size: 2.5, height: 0.5, curveSegments: 3
+                });
+                nameGeo.center();
+                nameGeo.translate(0, -10, -thickness/2);
+                nameGeo.rotateX(Math.PI);
+                textGeos.push(nameGeo);
+
+                // 4. Merge Everything into one Solid Manifold STL
+                const finalGeo = BufferGeometryUtils.mergeGeometries([baseGeo, ...textGeos]);
+
+                currentMesh = new THREE.Mesh(finalGeo, material);
+                scene.add(currentMesh);
+
+            } catch (e) {
+                console.error(e);
+                errorMsg.style.display = 'block';
+            }
+        }
+
+        // --- Slipcase Generator ---
+        function exportSlipcase() {
+            const format = document.getElementById('format-select').value;
+            let slipGeo;
+            
+            // Generate a solid block slightly larger than the format. 
+            // The slicer's "Vase Mode" will hollow it out perfectly.
+            const height = 90; // Tall enough to cover the item
+            
+            if (format === 'card') {
+                slipGeo = new THREE.BoxGeometry(65, 91, height, 50, 50, 50);
+            } else if (format === 'coin') {
+                slipGeo = new THREE.CylinderGeometry(26, 26, height, 64, 50);
+                slipGeo.rotateX(Math.PI / 2); // Align for math processing
+            } else if (format === 'stone') {
+                slipGeo = new THREE.CylinderGeometry(31, 31, height, 64, 50);
+                slipGeo.scale(1, 1, 82/62);
+                slipGeo.rotateX(Math.PI / 2);
+            }
+
+            // Add a wavy grip texture to the OUTSIDE walls
+            const positions = slipGeo.attributes.position;
+            for (let i = 0; i < positions.count; i++) {
+                const x = positions.getX(i);
+                const y = positions.getY(i);
+                const z = positions.getZ(i);
+
+                // For box, displace X and Y faces
+                if (format === 'card') {
+                    if (Math.abs(x) > 32 || Math.abs(y) > 45) {
+                        // Apply sine wave based on Z height for ribbed grip
+                        const wave = Math.sin(z * 0.5) * 0.5;
+                        if (x > 0) positions.setX(i, x + wave);
+                        else if (x < 0) positions.setX(i, x - wave);
+                        
+                        if (y > 0) positions.setY(i, y + wave);
+                        else if (y < 0) positions.setY(i, y - wave);
+                    }
+                } else {
+                    // For cylinders, displace radial edge
+                    const dist = Math.sqrt(x*x + y*y);
+                    if (dist > 25) { // Roughly outer edge
+                        const angle = Math.atan2(y, x);
+                        const wave = Math.sin(z * 0.5) * 0.5; // Vertical ribs
+                        positions.setX(i, x + Math.cos(angle) * wave);
+                        positions.setY(i, y + Math.sin(angle) * wave);
+                    }
+                }
+            }
+            slipGeo.computeVertexNormals();
+            
+            // Export directly (no need to render to scene)
+            const exportMesh = new THREE.Mesh(slipGeo, material);
+            const exporter = new STLExporter();
+            const stlString = exporter.parse(exportMesh);
+            triggerDownload(stlString, `BlindBox_Sleeve_${format}.stl`);
+        }
+
+        // --- Logic Builder & UI ---
         function buildComboEquation() {
             const baseEq = document.getElementById('base-select').value;
             const microEq = document.getElementById('micro-select').value;
@@ -368,18 +380,12 @@
             document.getElementById('intensity-val').textContent = intensity;
             document.getElementById('rotation-val').textContent = rotation + '°';
 
-            // Constructing a safe, valid JS string to handle 2D rotation and combination
             const eqStr = `(function(x, y) {
-    // 1. Calculate Rotation Matrix
     const th = ${rotation} * Math.PI / 180;
     const rx = x * Math.cos(th) - y * Math.sin(th);
     const ry = x * Math.sin(th) + y * Math.cos(th);
-    
-    // 2. Define Components
     const base = (x, y) => ${baseEq};
     const micro = (x, y) => ${microEq};
-    
-    // 3. Combine: Base + (Rotated Micro * Intensity)
     return base(x, y) + ${intensity} * micro(rx, ry);
 })(x, y)`;
 
@@ -387,164 +393,62 @@
             generateSurface();
         }
 
-        // --- 4. Core Render Logic ---
-        function generateSurface() {
-            const eqStr = document.getElementById('equation-input').value;
-            const min = parseFloat(document.getElementById('bounds-min').value);
-            const max = parseFloat(document.getElementById('bounds-max').value);
-            const errorMsg = document.getElementById('error-msg');
-
-            if (currentMesh) {
-                scene.remove(currentMesh);
-                currentMesh.geometry.dispose();
-            }
-
-            try {
-                const zFunc = new Function('x', 'y', 'return ' + eqStr + ';');
-                zFunc(0, 0); // Test execution
-                errorMsg.style.display = 'none';
-
-                const size = max - min;
-                const segments = 150; // High resolution
-                const geometry = new THREE.PlaneGeometry(size, size, segments, segments);
-                const positions = geometry.attributes.position;
-                
-                for (let i = 0; i < positions.count; i++) {
-                    const localX = positions.getX(i);
-                    const localY = positions.getY(i);
-                    const mappedX = mapRange(localX, -size/2, size/2, min, max);
-                    const mappedY = mapRange(localY, -size/2, size/2, min, max);
-
-                    const zVal = zFunc(mappedX, mappedY);
-                    if(!isNaN(zVal)) positions.setZ(i, zVal);
-                }
-
-                geometry.computeVertexNormals();
-                currentMesh = new THREE.Mesh(geometry, material);
-                currentMesh.rotation.x = -Math.PI / 2;
-                currentMesh.castShadow = true;
-                currentMesh.receiveShadow = true;
-                scene.add(currentMesh);
-
-            } catch (e) {
-                console.error(e);
-                errorMsg.style.display = 'block';
-            }
-        }
-
-        function mapRange(value, inMin, inMax, outMin, outMax) {
-            return (value - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
-        }
-
-        function exportSTL() {
-            if (!currentMesh) return;
-            const exporter = new STLExporter();
-            const stlString = exporter.parse(scene);
-            const blob = new Blob([stlString], { type: 'text/plain' });
+        function triggerDownload(content, filename) {
+            const blob = new Blob([content], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
-            link.style.display = 'none';
-            link.href = url;
-            link.download = 'Sensory_Combo_Surface.stl';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
+            link.style.display = 'none'; link.href = url; link.download = filename;
+            document.body.appendChild(link); link.click();
+            document.body.removeChild(link); URL.revokeObjectURL(url);
         }
 
-        // --- 5. UI & Storage Initialization ---
         function initUI() {
-            // Populate Combo Builder Selects
             const baseSelect = document.getElementById('base-select');
             basePatterns.forEach(p => baseSelect.add(new Option(p.title, p.eq)));
             
             const microSelect = document.getElementById('micro-select');
             microTextures.forEach(p => microSelect.add(new Option(p.title, p.eq)));
 
-            // Populate Master Presets Select
-            const presetSelect = document.getElementById('preset-select');
-            equationLibrary.forEach(p => presetSelect.add(new Option(p.title, p.eq)));
-
-            // Event Listeners for Combo Builder (Auto-updates)
+            // Events
             baseSelect.addEventListener('change', buildComboEquation);
             microSelect.addEventListener('change', buildComboEquation);
             document.getElementById('intensity').addEventListener('input', buildComboEquation);
             document.getElementById('rotation').addEventListener('input', buildComboEquation);
-
-            // Event Listener for Manual Preset Override
-            presetSelect.addEventListener('change', (e) => {
-                if(e.target.value) {
-                    document.getElementById('equation-input').value = e.target.value;
-                    generateSurface();
-                }
+            document.getElementById('format-select').addEventListener('change', generateSurface);
+            document.getElementById('edition-name').addEventListener('input', generateSurface);
+            
+            document.getElementById('btn-render').addEventListener('click', generateSurface);
+            
+            document.getElementById('btn-export').addEventListener('click', () => {
+                const exporter = new STLExporter();
+                const stlString = exporter.parse(scene);
+                const format = document.getElementById('format-select').value;
+                triggerDownload(stlString, `TouchySubjects_${format}_Solid.stl`);
             });
 
-            // Buttons
-            document.getElementById('btn-render').addEventListener('click', generateSurface);
-            document.getElementById('btn-export').addEventListener('click', exportSTL);
-            document.getElementById('btn-save').addEventListener('click', saveToBank);
+            document.getElementById('btn-export-box').addEventListener('click', exportSlipcase);
 
-            renderSavedBank();
-            
-            // Set initial state
-            baseSelect.selectedIndex = 1; // Gentle Rolling Waves
-            microSelect.selectedIndex = 0; // Diamond Knurling
+            document.getElementById('btn-gacha').addEventListener('click', () => {
+                baseSelect.selectedIndex = Math.floor(Math.random() * basePatterns.length);
+                microSelect.selectedIndex = Math.floor(Math.random() * microTextures.length);
+                document.getElementById('intensity').value = (Math.random() * 2).toFixed(2);
+                document.getElementById('rotation').value = Math.floor(Math.random() * 36) * 10;
+                
+                const names = ["Ethereal", "Kinetic", "Quantum", "Echo", "Void", "Prism", "Neon"];
+                const adjectives = ["Ripple", "Burst", "Matrix", "Shift", "Pulse", "Drift"];
+                document.getElementById('edition-name').value = 
+                    names[Math.floor(Math.random()*names.length)] + " " + adjectives[Math.floor(Math.random()*adjectives.length)];
+                
+                buildComboEquation();
+            });
+
+            // Initial Build
+            baseSelect.selectedIndex = 1; 
+            microSelect.selectedIndex = 0;
             buildComboEquation();
         }
 
-        function saveToBank() {
-            const nameInput = document.getElementById('save-name');
-            const name = nameInput.value.trim() || `Combo Design ${Date.now().toString().slice(-4)}`;
-            const currentEq = document.getElementById('equation-input').value;
-            const bMin = document.getElementById('bounds-min').value;
-            const bMax = document.getElementById('bounds-max').value;
-
-            const newSave = { id: Date.now(), name, eq: currentEq, min: bMin, max: bMax };
-            let bank = JSON.parse(localStorage.getItem('sensoryBankPro') || '[]');
-            bank.push(newSave);
-            localStorage.setItem('sensoryBankPro', JSON.stringify(bank));
-            
-            nameInput.value = '';
-            renderSavedBank();
-        }
-
-        function renderSavedBank() {
-            const savedList = document.getElementById('saved-list');
-            savedList.innerHTML = '';
-            let bank = JSON.parse(localStorage.getItem('sensoryBankPro') || '[]');
-            
-            bank.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'saved-item';
-                
-                const textSpan = document.createElement('span');
-                textSpan.textContent = item.name;
-                textSpan.style.flexGrow = '1';
-                
-                textSpan.onclick = () => {
-                    document.getElementById('equation-input').value = item.eq;
-                    document.getElementById('bounds-min').value = item.min;
-                    document.getElementById('bounds-max').value = item.max;
-                    document.getElementById('preset-select').value = ""; // clear preset
-                    generateSurface();
-                };
-
-                const delBtn = document.createElement('button');
-                delBtn.className = 'delete-btn';
-                delBtn.innerHTML = '×';
-                delBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    bank = bank.filter(b => b.id !== item.id);
-                    localStorage.setItem('sensoryBankPro', JSON.stringify(bank));
-                    renderSavedBank();
-                };
-
-                div.appendChild(textSpan);
-                div.appendChild(delBtn);
-                savedList.appendChild(div);
-            });
-        }
-
+        // --- Render Loop ---
         function animate() {
             requestAnimationFrame(animate);
             controls.update();
@@ -557,7 +461,6 @@
             renderer.setSize(container.clientWidth, container.clientHeight);
         });
 
-        initUI();
         animate();
     </script>
 </body>
