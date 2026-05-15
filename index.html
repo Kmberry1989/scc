@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Touchy Subjects LLC - Production Pipeline</title>
+    <title>Touchy Subjects LLC - Tactile Generator</title>
     <style>
         :root {
             --bg-color: #1a1a1f;
             --panel-bg: #22222a;
             --text-main: #f0f0f5;
             --text-muted: #8a8a9e;
-            --accent: #d84b7b; /* Touchy Subjects Brand Accent */
+            --accent: #d84b7b;
             --accent-hover: #b83a60;
             --border: #333340;
             --panel-width: 450px;
@@ -29,7 +29,7 @@
         }
 
         .panel-header { padding: 15px 20px; background-color: #17171d; border-bottom: 1px solid var(--border); }
-        .panel-header h1 { margin: 0; font-size: 1.2rem; color: var(--accent); letter-spacing: 1px; }
+        .panel-header h1 { margin: 0; font-size: 1.2rem; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; }
         .panel-header p { margin: 2px 0 0 0; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
 
         .panel-content { padding: 20px; overflow-y: auto; flex-grow: 1; }
@@ -40,7 +40,7 @@
         }
         .section-title:first-child { margin-top: 0; }
 
-        .control-group { margin-bottom: 12px; }
+        .control-group { margin-bottom: 15px; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         
         label { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 0.8rem; font-weight: 600; color: #d0d0df; }
@@ -49,7 +49,7 @@
             width: 100%; padding: 8px 10px; background-color: #131318; border: 1px solid var(--border);
             color: var(--text-main); border-radius: 4px; font-family: monospace; box-sizing: border-box; font-size: 0.85rem;
         }
-        textarea { resize: vertical; min-height: 60px; color: #a4b4ff; }
+        textarea { resize: vertical; min-height: 80px; color: #a4b4ff; }
         select { cursor: pointer; font-family: inherit; }
         input[type="range"] { width: 100%; margin: 5px 0; cursor: pointer; accent-color: var(--accent); }
 
@@ -64,12 +64,11 @@
         button.action:hover { background-color: #357abd; }
 
         #canvas-container { flex-grow: 1; position: relative; background: radial-gradient(circle at center, #252530 0%, #101015 100%); }
-        #loading-msg, #error-msg {
+        #error-msg {
             position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
             padding: 8px 16px; border-radius: 4px; display: none; z-index: 20; font-weight: bold; font-size: 0.9rem;
+            background-color: rgba(255, 74, 74, 0.9); color: white;
         }
-        #error-msg { background-color: rgba(255, 74, 74, 0.9); color: white; }
-        #loading-msg { background-color: rgba(74, 144, 226, 0.9); color: white; display: block; }
     </style>
     
     <script type="importmap">
@@ -85,12 +84,12 @@
 
     <div id="sidebar">
         <div class="panel-header">
-            <h1>TOUCHY SUBJECTS LLC</h1>
-            <p>Sensory Production Pipeline</p>
+            <h1>Touchy Subjects LLC</h1>
+            <p>Tactile Geometry Generator</p>
         </div>
         <div class="panel-content">
             
-            <div class="section-title">1. Standardized Format</div>
+            <div class="section-title">1. Physical Format</div>
             <div class="control-group">
                 <select id="format-select">
                     <option value="card">Standard Card (63x88mm)</option>
@@ -99,8 +98,16 @@
                 </select>
             </div>
 
-            <div class="section-title">2. Tactile Generator</div>
-            <button id="btn-gacha" class="secondary">🎲 Randomize (Gacha Mechanics)</button>
+            <div class="section-title">2. Equation Library</div>
+            <div class="control-group">
+                <label>Preset Designs</label>
+                <select id="preset-select">
+                    <option value="">-- Select a Preset --</option>
+                </select>
+            </div>
+
+            <div class="section-title">3. Combo Builder</div>
+            <button id="btn-gacha" class="secondary">🎲 Randomize Combo</button>
             
             <div class="control-group">
                 <label>Base Pattern (Macro)</label>
@@ -113,7 +120,7 @@
 
             <div class="control-group grid-2">
                 <div>
-                    <label>Intensity <span id="intensity-val">0.5</span></label>
+                    <label>Intensity <span id="intensity-val">0.8</span></label>
                     <input type="range" id="intensity" min="0" max="3" step="0.05" value="0.8">
                 </div>
                 <div>
@@ -122,25 +129,18 @@
                 </div>
             </div>
 
-            <div class="control-group" style="display:none;">
-                <label>Z = f(x, y) Core Logic</label>
+            <div class="section-title">4. Raw Mathematical Logic</div>
+            <div class="control-group">
+                <label>Z = f(x, y) JavaScript Math</label>
                 <textarea id="equation-input"></textarea>
             </div>
 
-            <div class="section-title">3. Branding & Export</div>
-            <div class="control-group">
-                <label>Edition Name (Embossed on back)</label>
-                <input type="text" id="edition-name" value="Series 1 Proto">
-            </div>
-
-            <button id="btn-render">Refresh Preview</button>
-            <button id="btn-export" class="action">💾 Export Solid Collectible (.STL)</button>
-            <button id="btn-export-box" class="secondary">📦 Export Vase-Mode Slipcase (.STL)</button>
+            <button id="btn-render">Force Render Surface</button>
+            <button id="btn-export" class="action">💾 Export Solid STL</button>
         </div>
     </div>
 
     <div id="canvas-container">
-        <div id="loading-msg">Loading Fonts & Systems...</div>
         <div id="error-msg">Invalid Geometry Logic</div>
     </div>
 
@@ -148,10 +148,34 @@
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         import { STLExporter } from 'three/addons/exporters/STLExporter.js';
-        import { FontLoader } from 'three/addons/loaders/FontLoader.js';
-        import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 
         // --- Data Banks ---
+        const equationLibrary = [
+            { id: 'ripple', title: 'The Water Ripple', eq: 'Math.sin(Math.sqrt(x*x + y*y))' },
+            { id: 'egg', title: 'The Egg Carton', eq: 'Math.sin(x) * Math.cos(y)' },
+            { id: 'saddle', title: 'The Saddle', eq: '(x*x - y*y) / 10' },
+            { id: 'sombrero', title: 'The Sombrero', eq: '10 * Math.sin(Math.sqrt(x*x + y*y)) / (Math.sqrt(x*x + y*y) + 0.001)' },
+            { id: 'waves', title: 'Intersecting Waves', eq: 'Math.sin(x) + Math.cos(y)' },
+            { id: 'knurling', title: 'Diamond Knurling', eq: 'Math.abs(Math.sin(x)) + Math.abs(Math.cos(y))' },
+            { id: 'spikes', title: 'Soft Spikes', eq: 'Math.sin(x * y)' },
+            { id: 'terrain', title: 'Rolling Terrain', eq: 'Math.sin(x) + 0.5 * Math.sin(2 * y) + 0.25 * Math.cos(3 * x)' },
+            { id: 'waffle', title: 'The Waffle Iron', eq: 'Math.cos(x) + Math.cos(y) + Math.cos(x+y)' },
+            { id: 'nodes', title: 'Massage Nodes', eq: '2 * Math.abs(Math.sin(x)) * Math.abs(Math.sin(y))' },
+            { id: 'fingerprint', title: 'The Fingerprint', eq: 'Math.sin(Math.sqrt(x*x + y*y) - Math.atan2(y, x) * 3)' },
+            { id: 'corduroy', title: 'Directional Corduroy', eq: 'Math.sin(2 * x + Math.sin(y))' },
+            { id: 'dimples', title: 'Dimpled Surface', eq: '-(Math.pow(Math.cos(x), 2) + Math.pow(Math.cos(y), 2))' },
+            { id: 'macromicro', title: 'Macro/Micro Dual-Feed', eq: 'Math.sin(x/2) * Math.cos(y/2) + 0.3 * Math.sin(x*4) * Math.cos(y*4)' },
+            { id: 'interference', title: 'Interference Static', eq: 'Math.sin((x * y) / 3) * Math.cos(x + y)' },
+            { id: 'glitch', title: 'Digital Glitch', eq: 'Math.floor(Math.sin(x) * 3) / 3 + Math.floor(Math.cos(y) * 3) / 3' },
+            { id: 'dragon', title: 'Dragon Scales', eq: '0.5 * Math.sin(x) + Math.abs(Math.sin(x+y))' },
+            { id: 'braided', title: 'Braided Cord', eq: 'Math.sin(x + Math.sin(y)) + Math.cos(y + Math.cos(x))' },
+            { id: 'thorns', title: 'Crystalline Thorns', eq: 'Math.sqrt(Math.abs(Math.sin(x) * Math.cos(y)))' },
+            { id: 'starburst', title: 'The Starburst', eq: 'Math.sin(Math.atan2(y, x) * 12)' },
+            { id: 'bubble', title: 'Bubble Wrap', eq: 'Math.pow(Math.sin(x) * Math.sin(y), 2)' },
+            { id: 'pyramid', title: 'Stepped Pyramid', eq: 'Math.floor(x) + Math.floor(y)' },
+            { id: 'linear', title: 'Linear Micro-Vibrations', eq: 'x + 0.1 * Math.sin(y*5)' }
+        ];
+
         const basePatterns = [
             { title: 'Flat (Texture Only)', eq: '0' },
             { title: 'Gentle Rolling Waves', eq: 'Math.sin(x/2) + Math.cos(y/2)' },
@@ -198,30 +222,16 @@
         });
 
         let currentMesh = null;
-        let loadedFont = null;
-
-        // Load Font for Branding
-        const loader = new FontLoader();
-        loader.load('https://unpkg.com/three@0.160.0/examples/fonts/helvetiker_bold.typeface.json', function (font) {
-            loadedFont = font;
-            document.getElementById('loading-msg').style.display = 'none';
-            initUI();
-        });
 
         // --- Core Generator ---
         function generateSurface() {
-            if (!loadedFont) return;
             const errorMsg = document.getElementById('error-msg');
             const format = document.getElementById('format-select').value;
-            const editionName = document.getElementById('edition-name').value;
             const eqStr = document.getElementById('equation-input').value;
 
-            // Safely clear old meshes to prevent memory leaks
             if (currentMesh) {
                 scene.remove(currentMesh);
-                currentMesh.traverse((child) => {
-                    if (child.isMesh) child.geometry.dispose();
-                });
+                currentMesh.geometry.dispose();
             }
 
             try {
@@ -281,31 +291,8 @@
                 }
                 baseGeo.computeVertexNormals();
 
-                // 3. Create a Group to hold overlapping meshes safely (Bypasses rigid attribute rules)
-                currentMesh = new THREE.Group();
-                currentMesh.add(new THREE.Mesh(baseGeo, material));
-
-                // 4. Generate Branding Text (Using 'depth' instead of 'height' for modern Three.js)
-                const logoGeo = new TextGeometry('TOUCHY SUBJECTS LLC', {
-                    font: loadedFont, size: 3.5, depth: 0.5, curveSegments: 3
-                });
-                logoGeo.center();
-                logoGeo.translate(0, 10, -thickness/2); // Position on bottom, facing down
-                logoGeo.rotateX(Math.PI); // Flip so it prints correctly on bed
-                currentMesh.add(new THREE.Mesh(logoGeo, material));
-
-                // Only render custom text if input isn't empty
-                if (editionName.trim().length > 0) {
-                    const nameGeo = new TextGeometry(editionName.trim().toUpperCase(), {
-                        font: loadedFont, size: 2.5, depth: 0.5, curveSegments: 3
-                    });
-                    nameGeo.center();
-                    nameGeo.translate(0, -10, -thickness/2);
-                    nameGeo.rotateX(Math.PI);
-                    currentMesh.add(new THREE.Mesh(nameGeo, material));
-                }
-
-                // Add grouped items to the scene for viewing and exporting
+                // 3. Create the mesh
+                currentMesh = new THREE.Mesh(baseGeo, material);
                 scene.add(currentMesh);
 
             } catch (e) {
@@ -313,57 +300,6 @@
                 errorMsg.textContent = "Logic Error: " + e.message;
                 errorMsg.style.display = 'block';
             }
-        }
-
-        // --- Slipcase Generator ---
-        function exportSlipcase() {
-            const format = document.getElementById('format-select').value;
-            let slipGeo;
-            
-            const height = 90; // Tall enough to cover the item
-            
-            if (format === 'card') {
-                slipGeo = new THREE.BoxGeometry(65, 91, height, 50, 50, 50);
-            } else if (format === 'coin') {
-                slipGeo = new THREE.CylinderGeometry(26, 26, height, 64, 50);
-                slipGeo.rotateX(Math.PI / 2);
-            } else if (format === 'stone') {
-                slipGeo = new THREE.CylinderGeometry(31, 31, height, 64, 50);
-                slipGeo.scale(1, 1, 82/62);
-                slipGeo.rotateX(Math.PI / 2);
-            }
-
-            const positions = slipGeo.attributes.position;
-            for (let i = 0; i < positions.count; i++) {
-                const x = positions.getX(i);
-                const y = positions.getY(i);
-                const z = positions.getZ(i);
-
-                if (format === 'card') {
-                    if (Math.abs(x) > 32 || Math.abs(y) > 45) {
-                        const wave = Math.sin(z * 0.5) * 0.5;
-                        if (x > 0) positions.setX(i, x + wave);
-                        else if (x < 0) positions.setX(i, x - wave);
-                        
-                        if (y > 0) positions.setY(i, y + wave);
-                        else if (y < 0) positions.setY(i, y - wave);
-                    }
-                } else {
-                    const dist = Math.sqrt(x*x + y*y);
-                    if (dist > 25) {
-                        const angle = Math.atan2(y, x);
-                        const wave = Math.sin(z * 0.5) * 0.5; 
-                        positions.setX(i, x + Math.cos(angle) * wave);
-                        positions.setY(i, y + Math.sin(angle) * wave);
-                    }
-                }
-            }
-            slipGeo.computeVertexNormals();
-            
-            const exportMesh = new THREE.Mesh(slipGeo, material);
-            const exporter = new STLExporter();
-            const stlString = exporter.parse(exportMesh);
-            triggerDownload(stlString, `BlindBox_Sleeve_${format}.stl`);
         }
 
         // --- Logic Builder & UI ---
@@ -386,6 +322,7 @@
 })(x, y)`;
 
             document.getElementById('equation-input').value = eqStr;
+            document.getElementById('preset-select').value = ""; // Clear preset selection
             generateSurface();
         }
 
@@ -399,44 +336,51 @@
         }
 
         function initUI() {
+            // Populate Equation Library Presets
+            const presetSelect = document.getElementById('preset-select');
+            equationLibrary.forEach(p => presetSelect.add(new Option(p.title, p.eq)));
+
+            // Populate Combo Builder Dropdowns
             const baseSelect = document.getElementById('base-select');
             basePatterns.forEach(p => baseSelect.add(new Option(p.title, p.eq)));
             
             const microSelect = document.getElementById('micro-select');
             microTextures.forEach(p => microSelect.add(new Option(p.title, p.eq)));
 
+            // Event Listeners: Combo Builder
             baseSelect.addEventListener('change', buildComboEquation);
             microSelect.addEventListener('change', buildComboEquation);
             document.getElementById('intensity').addEventListener('input', buildComboEquation);
             document.getElementById('rotation').addEventListener('input', buildComboEquation);
-            document.getElementById('format-select').addEventListener('change', generateSurface);
-            document.getElementById('edition-name').addEventListener('input', generateSurface);
             
+            // Event Listener: Preset Selection
+            presetSelect.addEventListener('change', (e) => {
+                if(e.target.value) {
+                    document.getElementById('equation-input').value = e.target.value;
+                    generateSurface();
+                }
+            });
+
+            // Event Listeners: Format & Export
+            document.getElementById('format-select').addEventListener('change', generateSurface);
             document.getElementById('btn-render').addEventListener('click', generateSurface);
             
             document.getElementById('btn-export').addEventListener('click', () => {
                 const exporter = new STLExporter();
-                const stlString = exporter.parse(scene); // Parses the entire Group perfectly
+                const stlString = exporter.parse(scene); 
                 const format = document.getElementById('format-select').value;
                 triggerDownload(stlString, `TouchySubjects_${format}_Solid.stl`);
             });
-
-            document.getElementById('btn-export-box').addEventListener('click', exportSlipcase);
 
             document.getElementById('btn-gacha').addEventListener('click', () => {
                 baseSelect.selectedIndex = Math.floor(Math.random() * basePatterns.length);
                 microSelect.selectedIndex = Math.floor(Math.random() * microTextures.length);
                 document.getElementById('intensity').value = (Math.random() * 2).toFixed(2);
                 document.getElementById('rotation').value = Math.floor(Math.random() * 36) * 10;
-                
-                const names = ["Ethereal", "Kinetic", "Quantum", "Echo", "Void", "Prism", "Neon"];
-                const adjectives = ["Ripple", "Burst", "Matrix", "Shift", "Pulse", "Drift"];
-                document.getElementById('edition-name').value = 
-                    names[Math.floor(Math.random()*names.length)] + " " + adjectives[Math.floor(Math.random()*adjectives.length)];
-                
                 buildComboEquation();
             });
 
+            // Initial Build
             baseSelect.selectedIndex = 1; 
             microSelect.selectedIndex = 0;
             buildComboEquation();
@@ -455,6 +399,7 @@
             renderer.setSize(container.clientWidth, container.clientHeight);
         });
 
+        initUI();
         animate();
     </script>
 </body>
