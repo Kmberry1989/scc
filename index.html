@@ -406,8 +406,19 @@
                             newZ = z - (topBevel - D);
                         }
                         
-                        // Top Face: Apply Math Texture inside the margin
-                        if (D > margin) {
+                        // To ensure the interlocking links form a continuous visual band when snapped together,
+                        // we calculate the texture margin dynamically based on the format.
+                        let texD = D;
+                        
+                        if (format === 'bracelet') {
+                            // Instead of a flat margin wrapping entirely around the tab and slot (which interrupts 
+                            // the texture visually), we restrict the margin to ONLY the left and right borders.
+                            // This allows the math texture to flow directly onto the tab and into the slot cuts.
+                            texD = 15 - Math.abs(mappedX); 
+                        }
+
+                        // Top Face: Apply Math Texture inside the safe margin
+                        if (texD > margin) {
                             // Standardize coordinate math mapping regardless of physical format geometry scale
                             const mathX = (mappedX / 31.5) * 10;
                             const mathY = (mappedY / 31.5) * 10;
