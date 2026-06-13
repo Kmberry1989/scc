@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -150,6 +151,7 @@
 
         // --- Data Banks ---
         const equationLibrary = [
+            // Original Presets
             { id: 'ripple', title: 'The Water Ripple', eq: 'Math.sin(Math.sqrt(x*x + y*y))' },
             { id: 'egg', title: 'The Egg Carton', eq: 'Math.sin(x) * Math.cos(y)' },
             { id: 'saddle', title: 'The Saddle', eq: '(x*x - y*y) / 10' },
@@ -172,7 +174,44 @@
             { id: 'starburst', title: 'The Starburst', eq: 'Math.sin(Math.atan2(y, x) * 12)' },
             { id: 'bubble', title: 'Bubble Wrap', eq: 'Math.pow(Math.sin(x) * Math.sin(y), 2)' },
             { id: 'pyramid', title: 'Stepped Pyramid', eq: 'Math.floor(x) + Math.floor(y)' },
-            { id: 'linear', title: 'Linear Micro-Vibrations', eq: 'x + 0.1 * Math.sin(y*5)' }
+            { id: 'linear', title: 'Linear Micro-Vibrations', eq: 'x + 0.1 * Math.sin(y*5)' },
+
+            // New Additions - Standard Forms
+            { id: 'softRollingWaves', title: 'Soft rolling waves', eq: '1.5*(Math.sin(x)+Math.cos(y))' },
+            { id: 'gentleDiagonalWave', title: 'Gentle diagonal wave', eq: '2*Math.sin((x+y)/2)' },
+            { id: 'wavyFabricRibbon', title: 'Wavy fabric / ribbon', eq: '1.2*Math.sin(x/1.5)+0.8*Math.cos(y/2)+0.2*x' },
+            { id: 'oceanRippleSurface', title: 'Ocean ripple surface', eq: '2*Math.sin(Math.sqrt(x*x+y*y))' },
+            { id: 'tightCircularRipples', title: 'Tight circular ripples', eq: '1.5*Math.sin(2*Math.sqrt(x*x+y*y))' },
+            { id: 'raisedCenterDome', title: 'Raised center dome', eq: '5*Math.exp(-(x*x+y*y)/50)' },
+            { id: 'softCraterBowl', title: 'Soft crater / bowl', eq: '-4*Math.exp(-(x*x+y*y)/35)' },
+            { id: 'donutLikeRaisedRing', title: 'Donut-like raised ring', eq: '3*Math.exp(-Math.pow(Math.sqrt(x*x+y*y)-6,2)/6)' },
+            { id: 'flowerPetals', title: 'Flower petals', eq: '2.5*Math.sin(6*Math.atan2(y,x))*Math.exp(-(x*x+y*y)/120)' },
+            { id: 'pinwheelSurface', title: 'Pinwheel surface', eq: '2*Math.sin(4*Math.atan2(y,x)+Math.sqrt(x*x+y*y))' },
+            { id: 'checkerboardHills', title: 'Checkerboard hills', eq: '1.5*Math.sin(x)*Math.sin(y)' },
+            { id: 'quiltedCushion', title: 'Quilted cushion', eq: '1.2*Math.cos(x)*Math.cos(y)+0.5*Math.sin(2*x)*Math.sin(2*y)' },
+            { id: 'topographicTerrain', title: 'Topographic terrain', eq: '1.2*Math.sin(x/2)+1.1*Math.cos(y/2)+0.7*Math.sin((x+y)/3)' },
+            { id: 'organicBlobSurface', title: 'Organic blob surface', eq: '1.4*Math.sin(x/2)+1.2*Math.cos(y/3)+0.8*Math.sin((x*y)/25)' },
+            { id: 'spikyRadialStar', title: 'Spiky radial star', eq: '2*Math.sin(8*Math.atan2(y,x))*(1-Math.sqrt(x*x+y*y)/18)' },
+            { id: 'sunburstRidges', title: 'Sunburst ridges', eq: '1.2*Math.sin(12*Math.atan2(y,x))+0.2*Math.sqrt(x*x+y*y)' },
+            { id: 'spiralShell', title: 'Spiral shell', eq: '0.3*Math.sqrt(x*x+y*y)+2*Math.sin(3*Math.atan2(y,x)+Math.sqrt(x*x+y*y))' },
+            { id: 'mountainPeak', title: 'Mountain peak', eq: '6/(1+0.08*(x*x+y*y))' },
+            { id: 'volcanoCone', title: 'Volcano cone', eq: '4*Math.exp(-(x*x+y*y)/80)-3*Math.exp(-(x*x+y*y)/10)' },
+            { id: 'raisedXForm', title: 'Raised X form', eq: '2*Math.exp(-Math.pow(x-y,2)/8)+2*Math.exp(-Math.pow(x+y,2)/8)' },
+            { id: 'raisedCrossPlusSign', title: 'Raised cross / plus sign', eq: '2*Math.exp(-x*x/5)+2*Math.exp(-y*y/5)' },
+            { id: 'softSquareCushion', title: 'Soft square cushion', eq: '3*Math.exp(-(Math.pow(x,4)+Math.pow(y,4))/8000)' },
+            { id: 'wovenBasketTexture', title: 'Woven basket texture', eq: '0.8*Math.sin(2*x)+0.8*Math.sin(2*y)+0.4*Math.sin(4*(x+y))' },
+            { id: 'lavaLampWaves', title: 'Lava lamp waves', eq: '1.5*Math.sin(x/2+Math.cos(y/2))+1.2*Math.cos(y/2+Math.sin(x/3))' },
+            { id: 'subtleCoinTexture', title: 'Subtle coin texture', eq: '0.4*Math.sin(4*x)*Math.sin(4*y)+1.5*Math.exp(-(x*x+y*y)/70)' },
+
+            // New Additions - Strong Dramatic Sculptural Shapes
+            { id: 'tallTwistedFlower', title: 'Tall twisted flower', eq: '4*Math.sin(5*Math.atan2(y,x))*Math.exp(-(x*x+y*y)/90)+1.5*Math.exp(-(x*x+y*y)/30)' },
+            { id: 'deepRippleBowl', title: 'Deep ripple bowl', eq: '-3*Math.exp(-(x*x+y*y)/80)+1.5*Math.sin(1.5*Math.sqrt(x*x+y*y))' },
+            { id: 'raisedMedallion', title: 'Raised medallion', eq: '3*Math.exp(-(x*x+y*y)/50)+0.7*Math.sin(8*Math.atan2(y,x))' },
+            { id: 'mechanicalGearLikeSurface', title: 'Mechanical gear-like surface', eq: '2*Math.sin(10*Math.atan2(y,x))*(Math.sqrt(x*x+y*y)/12)+0.3*Math.sqrt(x*x+y*y)' },
+            { id: 'meteorImpact', title: 'Meteor impact', eq: '3*Math.exp(-(x*x+y*y)/90)-5*Math.exp(-(x*x+y*y)/12)+0.5*Math.sin(3*Math.sqrt(x*x+y*y))' },
+            { id: 'candySwirl', title: 'Candy swirl', eq: '2*Math.sin(Math.sqrt(x*x+y*y)+5*Math.atan2(y,x))' },
+            { id: 'brainCoralTexture', title: 'Brain coral texture', eq: '0.8*Math.sin(3*x+Math.sin(y))+0.8*Math.cos(3*y+Math.cos(x))' },
+            { id: 'liquidGlassWaves', title: 'Liquid glass waves', eq: '1.2*Math.sin(x/2)+1.2*Math.cos(y/2)+0.8*Math.sin(Math.sqrt(x*x+y*y))' }
         ];
 
         const basePatterns = [
@@ -434,3 +473,5 @@
     </script>
 </body>
 </html>
+
+```
