@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -95,6 +94,7 @@
                 <select id="format-select">
                     <option value="square" selected>Square Card (63x63mm)</option>
                     <option value="card">Standard Card (63x88mm)</option>
+                    <option value="bracelet">Interlocking Bracelet Link</option>
                 </select>
             </div>
 
@@ -151,7 +151,6 @@
 
         // --- Data Banks ---
         const equationLibrary = [
-            // Original Presets
             { id: 'ripple', title: 'The Water Ripple', eq: 'Math.sin(Math.sqrt(x*x + y*y))' },
             { id: 'egg', title: 'The Egg Carton', eq: 'Math.sin(x) * Math.cos(y)' },
             { id: 'saddle', title: 'The Saddle', eq: '(x*x - y*y) / 10' },
@@ -176,7 +175,7 @@
             { id: 'pyramid', title: 'Stepped Pyramid', eq: 'Math.floor(x) + Math.floor(y)' },
             { id: 'linear', title: 'Linear Micro-Vibrations', eq: 'x + 0.1 * Math.sin(y*5)' },
 
-            // New Additions - Standard Forms
+            // Standard Forms
             { id: 'softRollingWaves', title: 'Soft rolling waves', eq: '1.5*(Math.sin(x)+Math.cos(y))' },
             { id: 'gentleDiagonalWave', title: 'Gentle diagonal wave', eq: '2*Math.sin((x+y)/2)' },
             { id: 'wavyFabricRibbon', title: 'Wavy fabric / ribbon', eq: '1.2*Math.sin(x/1.5)+0.8*Math.cos(y/2)+0.2*x' },
@@ -203,7 +202,7 @@
             { id: 'lavaLampWaves', title: 'Lava lamp waves', eq: '1.5*Math.sin(x/2+Math.cos(y/2))+1.2*Math.cos(y/2+Math.sin(x/3))' },
             { id: 'subtleCoinTexture', title: 'Subtle coin texture', eq: '0.4*Math.sin(4*x)*Math.sin(4*y)+1.5*Math.exp(-(x*x+y*y)/70)' },
 
-            // New Additions - Strong Dramatic Sculptural Shapes
+            // Strong Dramatic Sculptural Shapes
             { id: 'tallTwistedFlower', title: 'Tall twisted flower', eq: '4*Math.sin(5*Math.atan2(y,x))*Math.exp(-(x*x+y*y)/90)+1.5*Math.exp(-(x*x+y*y)/30)' },
             { id: 'deepRippleBowl', title: 'Deep ripple bowl', eq: '-3*Math.exp(-(x*x+y*y)/80)+1.5*Math.sin(1.5*Math.sqrt(x*x+y*y))' },
             { id: 'raisedMedallion', title: 'Raised medallion', eq: '3*Math.exp(-(x*x+y*y)/50)+0.7*Math.sin(8*Math.atan2(y,x))' },
@@ -232,6 +231,36 @@
             { title: 'Bubble Wrap Domes', eq: 'Math.pow(Math.sin(x*3) * Math.sin(y*3), 2)' },
             { title: 'Smooth Ripple', eq: 'Math.sin(Math.sqrt(x*x + y*y)*3)' }
         ];
+
+        // --- SDF Helpers for Bracelet Interlock ---
+        function sdBox(px, py, bx, by) {
+            let dx = Math.abs(px) - bx;
+            let dy = Math.abs(py) - by;
+            return Math.sqrt(Math.max(dx, 0)**2 + Math.max(dy, 0)**2) + Math.min(Math.max(dx, dy), 0);
+        }
+        
+        function sdCircle(px, py, r) {
+            return Math.sqrt(px*px + py*py) - r;
+        }
+
+        function braceletSDF(px, py) {
+            // Main body is 30x40mm (bx=15, by=20)
+            let d_box = sdBox(px, py, 15, 20);
+
+            // Jigsaw Tab (+Y direction)
+            let d_tab_circle = sdCircle(px, py - 25, 5.0);
+            let d_tab_neck = sdBox(px, py - 22, 3.0, 2.5); // Overlaps into body to merge nicely
+            let d_tab = Math.min(d_tab_circle, d_tab_neck);
+            let d_shape = Math.min(d_box, d_tab);
+
+            // Jigsaw Slot (-Y direction). Uses 0.2mm tolerance for mechanical snap fit.
+            let d_slot_circle = sdCircle(px, py + 15, 5.2);
+            let d_slot_neck = sdBox(px, py + 18, 3.2, 2.5); 
+            let d_slot = Math.min(d_slot_circle, d_slot_neck);
+
+            return Math.max(d_shape, -d_slot);
+        }
+
 
         // --- Three.js Setup ---
         const container = document.getElementById('canvas-container');
@@ -279,6 +308,7 @@
 
                 let width = 63, height = 63; // Default Square
                 if (format === 'card') { height = 88; }
+                if (format === 'bracelet') { width = 45; height = 65; } // Base geometry footprint needed to cover SDF
 
                 const thickness = 3.0;
                 
@@ -301,46 +331,73 @@
                     let y = positions.getY(i);
                     let z = positions.getZ(i);
 
-                    // 1. Mathematically bend the outer grid into rounded corners (Squircle Mapping)
-                    let ax = Math.abs(x);
-                    let ay = Math.abs(y);
                     let mappedX = x;
                     let mappedY = y;
+                    let D = 0; // Distance to the boundary (positive inside, negative outside)
 
-                    // If vertex is in the corner zone
-                    if (ax > cx && ay > cy) {
-                        let u = Math.min(1, Math.max(0, (ax - cx) / radius));
-                        let v = Math.min(1, Math.max(0, (ay - cy) / radius));
+                    if (format === 'bracelet') {
+                        D = -braceletSDF(x, y); 
                         
-                        // Map square grid to circular arc
-                        let u_new = u * Math.sqrt(1 - (v * v) / 2);
-                        let v_new = v * Math.sqrt(1 - (u * u) / 2);
+                        if (D < 0) {
+                            // If we are outside the puzzle piece, project point perfectly to the SDF boundary via Gradient Descent
+                            let px = x, py = y;
+                            for (let step = 0; step < 15; step++) {
+                                let d = braceletSDF(px, py);
+                                if (d <= 0.005) break; 
+                                
+                                let eps = 0.01;
+                                let dx = (braceletSDF(px+eps, py) - braceletSDF(px-eps, py)) / (2*eps);
+                                let dy = (braceletSDF(px, py+eps) - braceletSDF(px, py-eps)) / (2*eps);
+                                
+                                let len = Math.sqrt(dx*dx + dy*dy);
+                                if (len > 0) { dx /= len; dy /= len; }
+                                
+                                px -= dx * d;
+                                py -= dy * d;
+                            }
+                            mappedX = px;
+                            mappedY = py;
+                            D = 0; // It's strictly on the boundary now
+                        }
+                    } else {
+                        // Original Squircle Mapping for Cards
+                        let ax = Math.abs(x);
+                        let ay = Math.abs(y);
+
+                        // If vertex is in the corner zone
+                        if (ax > cx && ay > cy) {
+                            let u = Math.min(1, Math.max(0, (ax - cx) / radius));
+                            let v = Math.min(1, Math.max(0, (ay - cy) / radius));
+                            
+                            // Map square grid to circular arc
+                            let u_new = u * Math.sqrt(1 - (v * v) / 2);
+                            let v_new = v * Math.sqrt(1 - (u * u) / 2);
+                            
+                            mappedX = Math.sign(x) * (cx + u_new * radius);
+                            mappedY = Math.sign(y) * (cy + v_new * radius);
+                        }
+
+                        // Calculate Distance (D) to the new rounded boundary
+                        let nax = Math.abs(mappedX);
+                        let nay = Math.abs(mappedY);
                         
-                        mappedX = Math.sign(x) * (cx + u_new * radius);
-                        mappedY = Math.sign(y) * (cy + v_new * radius);
+                        if (nax > cx && nay > cy) {
+                            D = radius - Math.sqrt(Math.pow(nax - cx, 2) + Math.pow(nay - cy, 2));
+                        } else if (nax > cx) {
+                            D = width / 2 - nax;
+                        } else if (nay > cy) {
+                            D = height / 2 - nay;
+                        } else {
+                            D = Math.min(width / 2 - nax, height / 2 - nay);
+                        }
+                        
+                        if (D < 0) D = 0; // Fix edge precision
                     }
 
                     positions.setX(i, mappedX);
                     positions.setY(i, mappedY);
 
-                    // 2. Calculate Distance (D) to the new rounded boundary
-                    let D = 0;
-                    let nax = Math.abs(mappedX);
-                    let nay = Math.abs(mappedY);
-                    
-                    if (nax > cx && nay > cy) {
-                        D = radius - Math.sqrt(Math.pow(nax - cx, 2) + Math.pow(nay - cy, 2));
-                    } else if (nax > cx) {
-                        D = width / 2 - nax;
-                    } else if (nay > cy) {
-                        D = height / 2 - nay;
-                    } else {
-                        D = Math.min(width / 2 - nax, height / 2 - nay);
-                    }
-                    
-                    if (D < 0) D = 0; // Fix edge precision
-
-                    // 3. Apply Bevels and Texture
+                    // 3. Apply Bevels and Texture based on distance from nearest edge (D)
                     let newZ = z;
 
                     if (z > 0.1) {
@@ -351,9 +408,9 @@
                         
                         // Top Face: Apply Math Texture inside the margin
                         if (D > margin) {
-                            // Scale coordinates for the math function
-                            const mathX = (mappedX / (width/2)) * 10;
-                            const mathY = (mappedY / (height/2)) * 10;
+                            // Standardize coordinate math mapping regardless of physical format geometry scale
+                            const mathX = (mappedX / 31.5) * 10;
+                            const mathY = (mappedY / 31.5) * 10;
                             const zVal = zFunc(mathX, mathY);
                             if(!isNaN(zVal)) newZ += zVal;
                         }
@@ -473,5 +530,3 @@
     </script>
 </body>
 </html>
-
-```
