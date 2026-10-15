@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#b8dff0" />
   <meta name="description" content="Step into a cozy 3D world full of little surprises." />
   <link rel="icon" href="data:," />
@@ -226,8 +226,21 @@
     @media(prefers-color-scheme:dark){.snug-board-backdrop{background:#0b1112ed}.snug-board-shell{background:#1f2728;color:#f5f3ec}.snug-board-card{background:#293233}.snug-board-card p,.snug-board-player small,.snug-board-log,.snug-board-bonus small{color:#b5bebe}.snug-board-player,.snug-board-bonus,.snug-board-scores span{background:#374142}.snug-board-status{color:#f5f3ec!important}.snug-board-close{background:#374142;color:#fff}.snug-board-items button,.snug-board-shop button{background:#414b4c;color:#fff}.board-lobby-copy p,.board-count-row small{color:#b5bebe}.board-count-row,.snug-board-ready{background:#293233}.board-count-picker button{background:#374142;border-color:#4b595a;color:#fff}.lobby-person.bot-seat{background:#32443a!important}}
     @media(prefers-reduced-motion:reduce){.snug-board-meter i{animation-duration:3.3s}}
   </style>
+  <link rel="stylesheet" href="assets/town-life.css">
+  <style>
+    /* Shown when a game module fails to load (e.g. a feature file missing from the upload). */
+    .snug-load-error{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;background:#101820f2}
+    .snug-load-error-card{max-width:420px;background:#fffdf8;color:#20303c;border-radius:18px;padding:28px 26px;text-align:center;box-shadow:0 18px 60px #0009}
+    .snug-load-error-card h2{font-size:22px;margin:0 0 10px}
+    .snug-load-error-card p{font-size:15px;line-height:1.55;margin:0 0 18px}
+    .snug-load-error-card code{font-size:13px;background:#eef2f5;padding:1px 6px;border-radius:6px}
+    .snug-load-error-back{font-size:16px;font-weight:700;padding:12px 26px;border-radius:999px;border:0;background:#3f7d4e;color:#fff;cursor:pointer}
+    @media(prefers-color-scheme:dark){.snug-load-error-card{background:#1d262b;color:#f2f5f4}.snug-load-error-card code{background:#2c383e}}
+    @media(prefers-reduced-motion:reduce){.snug-load-error-card{box-shadow:none}}
+  </style>
 </head>
 <body>
+  <noscript><p style="padding:24px;font-family:sans-serif">Snug Society needs JavaScript to run. Please enable JavaScript and reload.</p></noscript>
   <div data-generated-space-root="" data-generated-space-slug="snug-society"></div>
   <main class="snug-start-screen" role="dialog" aria-modal="true" aria-labelledby="snug-start-title">
     <div class="snug-start-scenery" aria-hidden="true">
@@ -317,16 +330,42 @@
       [...document.body.children].forEach(blockBehindStart);
       const startObserver=new MutationObserver(records=>records.forEach(record=>record.addedNodes.forEach(blockBehindStart)));
       startObserver.observe(document.body,{childList:true});
-      const waitFor=(selector,callback,attempt=0)=>{
+      const waitFor=(selector,callback,attempt=0,onGiveUp=null)=>{
         const node=document.querySelector(selector);
         if(node)return callback(node);
-        if(attempt<80)setTimeout(()=>waitFor(selector,callback,attempt+1),75);
+        if(attempt<80){setTimeout(()=>waitFor(selector,callback,attempt+1,onGiveUp),75);return;}
+        if(typeof onGiveUp==='function')onGiveUp();
       };
+      const showLoadError=(title,copy)=>{
+        if(document.querySelector('.snug-load-error'))return;
+        const overlay=document.createElement('div');
+        overlay.className='snug-load-error';
+        overlay.setAttribute('role','alertdialog');
+        overlay.setAttribute('aria-modal','true');
+        overlay.setAttribute('aria-labelledby','snug-load-error-title');
+        const card=document.createElement('div');
+        card.className='snug-load-error-card';
+        const heading=document.createElement('h2');
+        heading.id='snug-load-error-title';
+        heading.textContent=title;
+        const text=document.createElement('p');
+        text.textContent=copy;
+        const back=document.createElement('button');
+        back.type='button';
+        back.className='snug-load-error-back';
+        back.textContent='Back to menu';
+        back.addEventListener('click',()=>location.reload());
+        card.append(heading,text,back);
+        overlay.append(card);
+        document.body.append(overlay);
+        back.focus();
+      };
+      const ROOM_VIEW_MISSING='This mode needs the multiplayer module (assets/multiplayer.js) from the September 13 export, which was not uploaded to this repository. Re-upload the missing assets/ files to enable it.';
       const openRoomView=view=>waitFor('.room-dock',dock=>{
         dock.click();
-        if(view==='practice')waitFor('.multiplayer-sheet [data-view="practice"]',button=>button.click());
-        if(view==='board')waitFor('.multiplayer-sheet [data-action="board"]',button=>button.click());
-      });
+        if(view==='practice')waitFor('.multiplayer-sheet [data-view="practice"]',button=>button.click(),0,()=>showLoadError('Solo Practice is unavailable',ROOM_VIEW_MISSING));
+        if(view==='board')waitFor('.multiplayer-sheet [data-action="board"]',button=>button.click(),0,()=>showLoadError('Snug Board is unavailable',ROOM_VIEW_MISSING));
+      },0,()=>showLoadError('This mode is unavailable',ROOM_VIEW_MISSING));
       const skipCeremonyForShortcut=()=>{
         const portraitClose=document.querySelector('button[aria-label="Close Town Hall portraits"]');
         if(portraitClose)portraitClose.click();
@@ -344,7 +383,13 @@
         });
         document.documentElement.classList.remove('snug-start-open');
         setTimeout(()=>{destroyMenuEffects();screen.remove();},260);
-        if(mode==='town'&&!returning)window.dispatchEvent(new Event('snug-start-welcome'));
+        if(mode==='town'&&!returning){
+          window.dispatchEvent(new Event('snug-start-welcome'));
+          setTimeout(()=>{
+            if(!document.querySelector('.welcome-cinematic'))
+              showLoadError('The town could not start','The welcome scene failed to load. Reload the page to try again — if it keeps happening, a game file is missing from the upload.');
+          },3000);
+        }
         if(mode==='solo'||mode==='family'||mode==='board'){
           window.__snugSkipWelcome=true;
           skipCeremonyForShortcut();
@@ -384,6 +429,14 @@
         action?.();
       });
       screen.addEventListener('keydown',event=>{if(event.key==='Escape'&&!menuConfirm?.hidden){event.preventDefault();closeMenuConfirm();}});
+      menuConfirm?.addEventListener('keydown',event=>{
+        if(event.key!=='Tab'||menuConfirm.hidden)return;
+        const focusables=[menuConfirmCancel,menuConfirmGo].filter(button=>button&&!button.disabled);
+        if(!focusables.length)return;
+        const first=focusables[0],last=focusables[focusables.length-1];
+        if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
+        else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+      });
       screen.querySelectorAll('[data-start-mode]').forEach(button=>button.addEventListener('click',()=>{
         const mode=button.dataset.startMode;
         askMenuConfirmation(button,modeNames[mode]||'Continue',modePrompts[mode]||'Ready to continue?',()=>enter(mode));
@@ -4684,7 +4737,6 @@ version 0.8.2
   "appId": "…"
 }`,spellCheck:!1}),g&&l("div",{className:"config-error",role:"alert",children:g}),l("button",{className:"primary full",onClick:Q8,disabled:w==="connecting",children:w==="connecting"?"Signing in…":"Save override & sign in anonymously"}),m&&K0("div",{className:"session-detail",children:[l("b",{children:"Session-only save"}),l("span",{children:"Firebase reads and writes work now, but this anonymous sign-in and its progress will be lost when this page reloads. Use a full browser with site storage allowed for permanent saves."})]}),A&&K0("div",{className:"connected-project",children:[l("span",{className:`status-dot ${w}`}),K0("span",{children:[l("b",{children:A}),l("small",{children:i0})]})]}),K0("div",{className:"config-paths",children:[l("b",{children:"Firestore documents"}),K0("code",{children:["players/",Z0.current?.uid||"{uid}"]}),K0("code",{children:["houses/",Z0.current?.houseId||"{houseId}"]})]}),Vw()&&l("button",{className:"text-button",onClick:()=>{iI(),Z0.current=null,_0.current=!1,S("needs-config"),x("{}"),s("Paste your Firebase web app config to reconnect cloud multiplayer."),e(!1),a(!1)},children:"Remove saved Firebase config"})]}),W==="chat"&&K0(rW,{title:"Village chat",onClose:()=>H(null),children:[l("div",{className:"messages",children:U.map((o,L0)=>K0("div",{className:`message ${o.npc?"npc":"mine"}`,children:[l("b",{children:o.from}),l("p",{children:o.text})]},L0))}),K0("div",{className:"chat-compose",children:[l("label",{className:"sr-only",htmlFor:"chat-message",children:"Chat message"}),l("input",{id:"chat-message",value:K,onChange:(o)=>q(o.target.value),onKeyDown:(o)=>{if(o.key==="Enter")T0()},placeholder:"Say something kind…"}),l("button",{onClick:T0,"aria-label":"Send message",children:l(N6,{name:"send"})})]})]}),W==="friends"&&K0(rW,{title:"Invite to your nook",onClose:()=>H(null),children:[l("div",{className:"friend-list",children:[{n:"Miko",c:"#5c8fd8"},{n:"Jun",c:"#78af72"}].map((o)=>K0("div",{className:"friend",children:[l("span",{style:{background:o.c},children:o.n[0]}),l("div",{children:l("b",{children:o.n})}),l("button",{onClick:()=>I(`${o.n} is visiting your nook`),children:"Invite"})]},o.n))})]}),W==="shop"&&K0(rW,{title:"Meadow Market",onClose:()=>H(null),children:[K0("div",{className:"shop-balance",children:[l("span",{children:"Your shells"}),K0("b",{children:[l(N6,{name:"coin",size:18}),J.coins]})]}),l("div",{className:"shop-grid",children:F$.concat(snugShopCosmetics).map((o)=>{let L0=J.owned.includes(o.id);return K0("article",{className:"shop-item",children:[l("div",{className:"item-art",style:{background:`color-mix(in srgb, ${o.color} 25%, var(--surface))`},children:l("span",{style:{background:o.color}})}),l("small",{children:o.category}),l("b",{children:o.name}),L0&&o.category==="Furniture"?l("button",{className:J.furniture.includes(o.id)?"owned":"",onClick:()=>f0(o.id),children:J.furniture.includes(o.id)?"Placed":"Place"}):l("button",{className:L0?"owned":"",onClick:()=>y0(o),children:L0?"Owned":K0(Y7,{children:[l(N6,{name:"coin",size:15}),o.cost]})})]},o.id)})})]}),W==="selfie"&&K0(rW,{title:"Town Hall portraits",onClose:()=>{H(null),setCaptureHint(!1)},children:[l("div",{className:"expression-photo-tabs",children:snugExpressions.map((o)=>K0("button",{className:J.expression===o?"active":"",onClick:()=>{Z((L0)=>({...L0,expression:o})),setCaptureHint(!0)},children:[l("span",{className:"expression-thumb",children:M[o]?l("img",{src:M[o].url,alt:`${snugExpressionLabel[o]} expression preview`}):l(N6,{name:"spark",size:18})}),M[o]?`${snugExpressionLabel[o]} ready`:`Add ${snugExpressionLabel[o]}`]},o))}),captureHint&&K0("div",{className:"quick-capture",role:"group","aria-label":`${snugExpressionLabel[J.expression]} camera`,children:[l("div",{className:"selfie-capture","data-label":P?"Preparing…":`${M[J.expression]?"Retake":"Take"} ${snugExpressionLabel[J.expression]} photo`,children:l("input",{"aria-label":P?"Preparing photo":`Take or choose a ${snugExpressionLabel[J.expression]} selfie`,type:"file",accept:"image/*",capture:"user",disabled:P,onChange:W8})}),l("button",{className:"quick-capture-close",onClick:()=>setCaptureHint(!1),"aria-label":"Dismiss quick camera",children:l(N6,{name:"close",size:18})})]}),K0("div",{className:"selfie-card",children:[l("div",{className:"selfie-preview",children:M[J.expression]?l("img",{src:M[J.expression].url,alt:`Your ${snugExpressionLabel[J.expression]} selfie preview`}):l(N6,{name:"spark",size:34})}),K0("div",{className:"selfie-copy",children:[l("b",{children:M[J.expression]?`${snugExpressionLabel[J.expression]} face ready`:`Photograph: ${snugExpressionLabel[J.expression]}`}),l("span",{children:"Fill the frame with your face, hold the phone at face level, and use soft, even lighting."})]})]}),K0("section",{className:"avatar-expression-preview","aria-live":"polite",children:[K0("div",{className:"avatar-expression-preview-copy",children:[l("span",{children:"Mayor's inspection window"}),l("b",{children:M[J.expression]?`${snugExpressionLabel[J.expression]} on your town avatar`:"Your portrait appears here"}),l("small",{children:M[J.expression]?"Exactly as your neighbors will see it on the floating coin head.":"Take the photograph and the town's finest preview contraption will do the rest."})]}),l("div",{className:"avatar-expression-stage",children:K0("div",{className:"portrait-avatar","data-expression":J.expression,style:{"--portrait-skin":J.skinTone,"--portrait-outfit":J.outfit},children:[l("div",{className:`portrait-head ${M[J.expression]?"":"empty"}`,style:M[J.expression]?{backgroundImage:`url(${M[J.expression].url})`}:void 0}),l("div",{className:"portrait-body"}),l("i",{className:"portrait-hand left"}),l("i",{className:"portrait-hand right"}),l("i",{className:"portrait-foot left"}),l("i",{className:"portrait-foot right"})]})})]}),M[J.expression]&&K0("div",{className:"face-editor",children:[K0("div",{className:"face-editor-head",children:[l("b",{children:"Frame the portrait"}),l("button",{onClick:faceReset,children:"Reset"})]}),K0("label",{className:"face-control",children:[K0("span",{children:["Scale",l("b",{children:`${Math.round((M[J.expression].edit?.scale??1)*100)}%`})]}),l("input",{type:"range",min:"0.8",max:"1.8",step:"0.02",value:M[J.expression].edit?.scale??1,onChange:(o)=>faceAdjust("scale",o.target.value)})]}),K0("div",{className:"face-control-pair",children:[K0("label",{className:"face-control",children:[K0("span",{children:["Width",l("b",{children:`${Math.round((M[J.expression].edit?.stretchX??1)*100)}%`})]}),l("input",{type:"range",min:"0.7",max:"1.4",step:"0.02",value:M[J.expression].edit?.stretchX??1,onChange:(o)=>faceAdjust("stretchX",o.target.value)})]}),K0("label",{className:"face-control",children:[K0("span",{children:["Height",l("b",{children:`${Math.round((M[J.expression].edit?.stretchY??1)*100)}%`})]}),l("input",{type:"range",min:"0.7",max:"1.4",step:"0.02",value:M[J.expression].edit?.stretchY??1,onChange:(o)=>faceAdjust("stretchY",o.target.value)})]})]}),K0("div",{className:"face-control-pair",children:[K0("label",{className:"face-control",children:[l("span",{children:"Left / right"}),l("input",{type:"range",min:"-90",max:"90",step:"2",value:M[J.expression].edit?.x??0,onChange:(o)=>faceAdjust("x",o.target.value)})]}),K0("label",{className:"face-control",children:[l("span",{children:"Up / down"}),l("input",{type:"range",min:"-90",max:"90",step:"2",value:M[J.expression].edit?.y??0,onChange:(o)=>faceAdjust("y",o.target.value)})]})]})]}),K0("div",{className:"photo-guidance",children:[l("b",{children:"For the cleanest result"}),l("span",{children:"Fill most of the frame with your face."}),l("span",{children:"Keep the phone level with your eyes."}),l("span",{children:"Use even light and avoid strong shadows."})]}),K0("div",{className:"selfie-actions",children:[l("div",{className:"selfie-capture",children:l("input",{"aria-label":P?"Preparing photo":`Take or choose a ${snugExpressionLabel[J.expression]} selfie`,type:"file",accept:"image/*",capture:"user",disabled:P,onChange:W8})}),M[J.expression]&&l("button",{className:"secondary",onClick:removeFace,children:`Remove ${snugExpressionLabel[J.expression]} photo`})]}),K0("div",{className:"face-sharing",children:[K0("span",{children:[l("b",{children:"Let neighbors see these portraits"}),l("small",{children:w==="synced"&&!m?faceSharing?"Other players can see your cropped expressions.":"Only you can use your cropped expressions.":"Photos are not shared while Firebase Storage is unavailable."})]}),l("button",{type:"button",className:"face-sharing-toggle",role:"switch","aria-checked":faceSharing,"aria-label":"Share expression photos with other players",onClick:toggleFaceSharing})]}),l("p",{className:"selfie-note",children:w==="synced"&&!m?"Cropped expression images are saved to your Firebase profile so they persist across sessions and can be shared with other players in multiplayer when sharing is on. Raw camera photos never leave your device. Turn sharing off anytime.":"Cropped expression images stay only in this game session while Firebase Storage is unavailable and are not shared with other players. Raw camera photos never leave your device. Your sharing choice can be changed after Firebase reconnects."}),K0("div",{className:"storage-fallback",role:"status",style:{display:faceStorageNotice||w==="offline"||m?"block":"none"},children:faceStorageNotice||(m?"This browser can’t keep your Firebase sign-in, so expression photos remain local to this session.":"Firebase Storage is unavailable right now. New expression photos remain local to this session and won’t be shared.")})]})]})}var rI=document.querySelector("[data-generated-space-root]");if(!rI)throw Error("missing generated space root element");aI.createRoot(rI).render(l(D$,{children:l(k$,{client:Z9,children:l("div",{className:"hatch-space-root","data-hatch-space-root":!0,children:l(oI,{})})})}));
 </script>
-  <link rel="stylesheet" href="assets/town-life.css">
   <script type="module" src="assets/multiplayer.js"></script>
   <script type="module" src="assets/town-life.js"></script>
   <script type="module" src="assets/snug-audio.js"></script>
