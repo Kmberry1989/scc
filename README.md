@@ -30,6 +30,10 @@ Three.js r160 is vendored in `assets/vendor/three/` — no CDN, works offline.
   `sin cos tan asin acos atan atan2 hypot tanh exp log sqrt abs ceil floor
   round min max pow`, operators `+ - * / ^ ( )`. Example:
   `sin(x*2)*cos(y*2)`. Bad input shows a plain-language error, nothing breaks.
+- **Image relief** — upload any picture instead of an equation; its brightness
+  becomes the heightfield (white = raised). All the Modify controls
+  (intensity, rotation, scale, offset, invert) apply to it. Picking a preset
+  or typing an equation switches back.
 
 ## Case options
 
