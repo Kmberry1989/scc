@@ -43,9 +43,9 @@ function useImagePixels(px,S){
   const data=new Float32Array(S*S),tmp=document.createElement('canvas');tmp.width=tmp.height=S;const tcx=tmp.getContext('2d'),out=tcx.createImageData(S,S);
   for(let i=0;i<S*S;i++){const g=(px[i*4]*.299+px[i*4+1]*.587+px[i*4+2]*.114)/255;data[i]=g*2-1;const b=Math.round(g*255);out.data[i*4]=out.data[i*4+1]=out.data[i*4+2]=b;out.data[i*4+3]=255}
   tcx.putImageData(out,0,0);const pcx=imgPrev.getContext('2d');pcx.clearRect(0,0,imgPrev.width,imgPrev.height);pcx.drawImage(tmp,0,0,imgPrev.width,imgPrev.height);
-  state.imageFn=(x,y)=>{const u=(x/10*.5+.5)*(S-1),v=(y/10*.5+.5)*(S-1),x0=Math.max(0,Math.min(S-2,Math.floor(u))),y0=Math.max(0,Math.min(S-2,Math.floor(v))),fx=u-x0,fy=v-y0,a=data[y0*S+x0],b=data[y0*S+x0+1],c=data[(y0+1)*S+x0],d=data[(y0+1)*S+x0+1];return(a*(1-fx)+b*fx)*(1-fy)+(c*(1-fx)+d*fx)*fy};
-  setImageMode(true);sync();
-  ui.status.textContent='Image loaded as relief. Intensity, rotation, scale and invert all apply.';ui.status.className='status ok';
+  state.imageFn=(x,y)=>{const u=(x/10*.5+.5)*(S-1),v=((-y)/10*.5+.5)*(S-1),x0=Math.max(0,Math.min(S-2,Math.floor(u))),y0=Math.max(0,Math.min(S-2,Math.floor(v))),fx=u-x0,fy=v-y0,a=data[y0*S+x0],b=data[y0*S+x0+1],c=data[(y0+1)*S+x0],d=data[(y0+1)*S+x0+1];return(a*(1-fx)+b*fx)*(1-fy)+(c*(1-fx)+d*fx)*fy};
+  ui.rotation.value=0;setImageMode(true);sync();
+  ui.status.textContent='Image loaded upright. Intensity, rotation, scale and invert all still apply.';ui.status.className='status ok';
 }
 imgFile.onchange=()=>{
   const file=imgFile.files&&imgFile.files[0];

@@ -33,8 +33,11 @@ Three.js r160 is vendored in `assets/vendor/three/` — no CDN, works offline.
 - **Image relief** — upload any picture instead of an equation; its brightness
   becomes the heightfield (white = raised), sampled at 512 × 512 and built
   on a 256-segment tile mesh (about 0.25 mm per vertex on the 63 mm tile),
-  so fine image detail survives into the print. All the Modify controls
-  (intensity, rotation, scale, offset, invert) apply to it. Picking a preset
+  so fine image detail survives into the print. An uploaded image loads
+  upright, with rotation reset to 0 — it no longer inherits the preset
+  default of 35°. All the Modify controls
+  (intensity, rotation, scale, offset, invert) still apply to it, so you
+  can rotate it deliberately from the slider. Picking a preset
   or typing an equation switches back.
 
 ## Case options
