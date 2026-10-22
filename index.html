@@ -329,7 +329,8 @@
         <div class="section">
           <h2>5. PRINT</h2>
           <p class="hint">
-            3 mm base, 4 mm protected rim, and relief clamped to ±1.6 mm.
+            One-piece: 3 mm base. Modular case: 2.4 mm back, 1.5 mm front rim,
+            0.25 mm per-side insert clearance, and relief clamped to ±1.6 mm.
           </p>
           <button id="export">Export solid STL</button>
         </div>
@@ -1009,7 +1010,9 @@
       makeTile = makeSmoothTile;
       camera.fov = 45;
       camera.updateProjectionMatrix();
-      camera.position.set(0, -60, 60);
+      // Keep the whole tile, rim, and optional attachment in frame. The prior
+      // camera distance made the texture fill the viewport and hid fit details.
+      camera.position.set(0, -100, 100);
       orbit.target.set(0, 0, 0);
       scene.children[0].intensity = 0.5;
       key.intensity = 1.8;
@@ -1141,80 +1144,20 @@
       ].map(([id, title, eq, intensity]) => ({ id, title, eq, intensity }));
       presets.push(...suppliedPresets);
       suppliedPresets.forEach((p) => ui.preset.add(new Option(p.title, p.id)));
-      state.interlocking = false;
-      const interlockLabel = document.createElement("label"),
-        interlockInput = document.createElement("input");
-      interlockInput.type = "checkbox";
-      interlockInput.style.cssText = "width:auto;margin-right:7px";
-      interlockLabel.append(interlockInput, "Interlocking jigsaw case edges");
-      ui.caseHint.before(interlockLabel);
-      interlockInput.oninput = () => {
-        state.interlocking = interlockInput.checked;
-        if (state.interlocking) ui.modular.checked = true;
-        sync();
-      };
-      const addCaseBase = addCase;
-      addCase = (group, W, H) => {
-        if (!state.interlocking) return addCaseBase(group, W, H);
-        const back = rounded(W, H, 6),
-          push = new THREE.Path(),
-          socket = new THREE.Path();
-        push.absarc(0, 0, 9, 0, Math.PI * 2, true);
-        socket.absarc(-W / 2 + 5.5, 0, 4.55, 0, Math.PI * 2, true);
-        back.holes.push(push, socket);
-        group.add(
-          new THREE.Mesh(
-            new THREE.ExtrudeGeometry(back, {
-              depth: 2.4,
-              bevelEnabled: true,
-              bevelSize: 0.6,
-              bevelThickness: 0.5,
-              bevelSegments: 2,
-            }),
-            caseMat,
-          ),
-        );
-        const rim = rounded(W, H, 6),
-          opening = roundedHole(W - 10, H - 10, 3),
-          rimSocket = new THREE.Path();
-        rimSocket.absarc(-W / 2 + 5.5, 0, 4.55, 0, Math.PI * 2, true);
-        rim.holes.push(opening, rimSocket);
-        const rimMesh = new THREE.Mesh(
-          new THREE.ExtrudeGeometry(rim, {
-            depth: 1.5,
-            bevelEnabled: true,
-            bevelSize: 0.55,
-            bevelThickness: 0.45,
-            bevelSegments: 2,
-          }),
-          caseMat,
-        );
-        rimMesh.position.z = 2.3;
-        group.add(rimMesh);
-        for (const [x, y, w, h] of [[0,H/2-5.4,10,1.2],[0,-H/2+5.4,10,1.2],[W/2-5.4,0,1.2,10],[-W/2+5.4,0,1.2,10]]) {
-          const tab = new THREE.Mesh(new THREE.BoxGeometry(w,h,.8), caseMat);
-          tab.position.set(x,y,3.9); tab.name = "insert-retention-tab"; group.add(tab);
-        }
-        for (const z of [1.2, 3.05]) {
-          const peg = new THREE.Mesh(
-            new THREE.CylinderGeometry(4.2, 4.2, z < 2 ? 2.4 : 1.5, 32),
-            caseMat,
-          );
-          peg.rotation.x = Math.PI / 2;
-          peg.position.set(W / 2 + 5.5, 0, z);
-          group.add(peg);
-        }
-        const neck = new THREE.Mesh(new THREE.BoxGeometry(10, 6, 2.4), caseMat);
-        neck.position.set(W / 2 + 1, 0, 1.2);
-        group.add(neck);
-      };
+      const interlockNotice = document.createElement("p");
+      interlockNotice.className = "hint";
+      interlockNotice.textContent =
+        "Interlocking edges are being held back until a printed fit coupon validates the joint.";
+      ui.caseHint.before(interlockNotice);
       const fullExport = document.getElementById("export"),
         caseExport = document.createElement("button"),
-        insertExport = document.createElement("button");
+        insertExport = document.createElement("button"),
+        fitCouponExport = document.createElement("button");
       caseExport.textContent = "Export case STL";
       insertExport.textContent = "Export texture insert STL";
-      caseExport.className = insertExport.className = "secondary";
-      fullExport.after(caseExport, insertExport);
+      fitCouponExport.textContent = "Export fit coupon STL";
+      caseExport.className = insertExport.className = fitCouponExport.className = "secondary";
+      fullExport.after(caseExport, insertExport, fitCouponExport);
       const exportPart = (part) => {
         if (!state.modular) return;
         const out = new THREE.Group();
@@ -1234,19 +1177,23 @@
       };
       caseExport.onclick = () => exportPart("case");
       insertExport.onclick = () => exportPart("insert");
-      const renderWithInterlock = render;
+      fitCouponExport.onclick = () => {
+        const coupon = new THREE.Group(), base = new THREE.Mesh(new THREE.BoxGeometry(30, 30, 2.4), caseMat);
+        coupon.add(base);
+        const rim = rounded(30, 30, 3); rim.holes.push(roundedHole(20, 20, 2));
+        const frame = new THREE.Mesh(new THREE.ExtrudeGeometry(rim, { depth: 1.5, bevelEnabled: true, bevelSize: .35, bevelThickness: .25, bevelSegments: 2 }), caseMat);
+        frame.position.z = 2.3; coupon.add(frame);
+        for (const [x, y, w, h] of [[0, 9.6, 7, 1.2], [0, -9.6, 7, 1.2], [9.6, 0, 1.2, 7], [-9.6, 0, 1.2, 7]]) { const tab = new THREE.Mesh(new THREE.BoxGeometry(w, h, .8), caseMat); tab.position.set(x, y, 3.9); coupon.add(tab); }
+        const insert = new THREE.Mesh(new THREE.BoxGeometry(19.5, 19.5, 3), mat); insert.position.set(27, 0, 1.5); coupon.add(insert);
+        const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([new STLExporter().parse(coupon)], { type: "model/stl" })); a.download = "TouchySubjects_fit_coupon.stl"; a.click();
+        ui.status.textContent = "Fit coupon exported: print it before a full modular case."; ui.status.className = "status ok";
+      };
+      const renderWithExports = render;
       render = () => {
-        if (state.interlocking) {
-          state.modular = true;
-          ui.modular.checked = true;
-        }
-        renderWithInterlock();
+        renderWithExports();
         const modular = state.modular;
         fullExport.hidden = modular;
-        caseExport.hidden = insertExport.hidden = !modular;
-        if (state.interlocking)
-          ui.caseHint.textContent =
-            "Interlocking case: the right jigsaw tab mates with the left socket of the next case. Print case and insert separately.";
+        caseExport.hidden = insertExport.hidden = fitCouponExport.hidden = !modular;
       };
       render();
     </script>
