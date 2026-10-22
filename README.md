@@ -31,7 +31,9 @@ Three.js r160 is vendored in `assets/vendor/three/` — no CDN, works offline.
   round min max pow`, operators `+ - * / ^ ( )`. Example:
   `sin(x*2)*cos(y*2)`. Bad input shows a plain-language error, nothing breaks.
 - **Image relief** — upload any picture instead of an equation; its brightness
-  becomes the heightfield (white = raised). All the Modify controls
+  becomes the heightfield (white = raised), sampled at 512 × 512 and built
+  on a 256-segment tile mesh (about 0.25 mm per vertex on the 63 mm tile),
+  so fine image detail survives into the print. All the Modify controls
   (intensity, rotation, scale, offset, invert) apply to it. Picking a preset
   or typing an equation switches back.
 
@@ -45,7 +47,8 @@ Three.js r160 is vendored in `assets/vendor/three/` — no CDN, works offline.
 
 ## Export
 
-- **Export solid STL** — one-piece tile.
+- **Export solid STL** — one-piece tile, exported as binary STL (much smaller
+  than ASCII at this mesh density).
 - With the modular case on, the button splits into **Export case STL** and
   **Export texture insert STL** — print separately.
 - Filenames carry the format, e.g. `TouchySubjects_square_modular_tile.stl`.
