@@ -67,6 +67,34 @@ pins are fiddly to print, lose, and push through. It is replaced by:
 The tile cube is gone too — it was a novelty with no real use. The
 frame, the rounded tile, and the keychain are the product now.
 
+## Tile sets
+
+Section 5, Tile Sets, adds four set modes. Sets use square tiles,
+regardless of the Tile Format setting. Story, chain, and memory sets
+use preset textures, cycling through the preset library starting at
+the currently selected preset. The picture puzzle splits the current
+design instead.
+
+- **Story frame** — 3, 4, or 5 square inserts in a row in one long
+  slide-in frame. Frame width is 170.6 mm for 3 tiles, 224.4 mm for 4,
+  and 278.2 mm for 5, so check your bed: the 4-tile frame fits a
+  220 mm bed diagonally, the 5-tile frame needs a larger bed or a
+  small scale-down in the slicer. Inserts are in left-to-right order.
+- **Tile chain** — 3, 4, or 5 full 63 mm tiles, each with a 14 mm loop
+  (7 mm hole) on both sides. Links are not printed linked: print the
+  links, then join them with split rings or jump rings after printing.
+- **Memory game** — 3 or 4 pairs, two tiles per texture. Tiles are
+  identical in size and shape, backs are blank, so pairs match by
+  touch only. Shuffle the printed tiles before playing.
+- **Picture puzzle** — the current design, split into 2×2 or 3×3
+  pieces in one big slide frame (116.8 mm square for 2×2,
+  170.6 mm for 3×3). Pieces are named by row and column, R1C1
+  top-left to bottom-right, and the pattern is continuous across
+  pieces, not repeated per piece. For an equation, rotation and scale
+  are applied to the whole picture before splitting, so pieces align.
+  For an uploaded image, the image is split at its original
+  orientation so pieces align.
+
 ## Export
 
 All exports are binary STL.
@@ -76,6 +104,11 @@ All exports are binary STL.
   (floor + wall + lip, plus the keychain if that is on) and
   **Export texture insert STL** — print separately, then slide the
   insert in from the open end.
+- With a set on, the button splits into **Export set frame STL**
+  (story and puzzle only) and **Export set tiles STL** — set tiles
+  download as one file per tile, in set order, so a failed tile print
+  can be reprinted on its own. Allow multiple downloads if your
+  browser asks.
 
 ## Print notes
 
