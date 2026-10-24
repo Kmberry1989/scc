@@ -18,6 +18,8 @@ Three.js r160 is vendored in `assets/vendor/three/` — no CDN, works offline.
 - **Square Tile** · 63 × 63 mm, or **Tall Card** · 63 × 88 mm.
 - 3 mm base, relief clamped to ±1.6 mm. Texture is inset
   from the edge so every tile keeps a strong, flat border.
+- Corners are rounded 8 mm, so tiles slide in and out without
+  catching on a sharp corner.
 
 ## Designing a surface
 
@@ -44,40 +46,36 @@ Three.js r160 is vendored in `assets/vendor/three/` — no CDN, works offline.
 
 The old rim case is gone — it could not fit: its opening was the same size
 as the insert (53 mm, shrunk to ~51.9 mm by its bevel), and its pocket was
-only ~1.35 mm deep for a 3 mm tile. It is replaced by:
+only ~1.35 mm deep for a 3 mm tile. Its latch-pin successor is gone too —
+pins are fiddly to print, lose, and push through. It is replaced by:
 
-- **Latch container (tray + lid + pins)** — a tray with a 2 mm floor and a
-  pocket 0.4 mm wider per side than the insert, so the insert actually
-  slides in. The lid is a frame that overlaps the insert by 2 mm per side,
-  so the insert cannot pass through it, and two latch pins (3.6 mm shaft
-  in a 4 mm hole) drop through ears on the tray and lid to lock the lid.
-  The tray floor keeps the 18 mm push-out opening: push the tile out from
-  the back to swap it. No bevels on container parts, so the printed sizes
-  are the designed sizes.
+- **Slide-in frame** — one frame, no pins, no lid to lose. A 2.2 mm floor,
+  a U-shaped wall (open at the bottom end), and a top lip frame that
+  overlaps the insert by 2 mm per side. The pocket is 0.4 mm wider per
+  side than the insert, the insert slides in from the open end until it
+  hits the far wall, and the lip holds it down with 0.4 mm of vertical
+  play. To swap a tile, press the exposed tile through the lip opening
+  and slide it back out the open end.
 - **Top keyring loop** — centered top loop, 14 mm across with a 7 mm hole,
   for a split ring or small clasp.
 - **Keychain fob on the loop** — a flat fob (32 × 26 mm, with a 5 mm hole at
   the far end for a split ring) joined to the loop by a flat connector
-  ring. On a one-piece tile it hangs from the tile; on a container it
-  hangs from the tray. Print it with the tile/tray — it is fused to the
-  loop, not a separate part to assemble.
-- **Cube of tiles (6 faces)** — the current texture on all six faces of a
-  63 mm cube. A 56.2 mm core stops the faces falling in, and eight corner
-  caps (three plates each, clearing the highest relief by 0.4 mm) hold the
-  corners. Cube mode is square-only and turns the container/keychain off.
+  ring. On a one-piece tile it hangs from the tile; on a frame it
+  hangs from the frame. Print it with the tile/frame — it is fused to
+  the loop, not a separate part to assemble.
+
+The tile cube is gone too — it was a novelty with no real use. The
+frame, the rounded tile, and the keychain are the product now.
 
 ## Export
 
 All exports are binary STL.
 
 - **Export solid STL** — one-piece tile (with loop/fob if those are on).
-- With the latch container on, the button splits into **Export tray STL**,
-  **Export lid STL**, **Export latch pins STL** (both pins in one file),
-  and **Export texture insert STL** — print separately, then drop the
-  insert in, set the lid on, and push both pins through the ears.
-- With the cube on, the button splits into **Export cube faces STL** (six
-  faces laid flat in a 3 × 2 grid, 199 × 131 mm), **Export cube core STL**,
-  and **Export cube caps STL** (eight caps in a row, 179 × 18 mm).
+- With the slide-in frame on, the button splits into **Export frame STL**
+  (floor + wall + lip, plus the keychain if that is on) and
+  **Export texture insert STL** — print separately, then slide the
+  insert in from the open end.
 
 ## Print notes
 
