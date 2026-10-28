@@ -9,6 +9,10 @@ details.ref{margin-top:10px;font-size:12px;color:var(--muted)}
 details.ref summary{cursor:pointer;color:var(--mint);font-weight:700}
 details.ref code{color:#bee8ff;background:#11101a;padding:1px 5px;border-radius:4px;font-size:11px}
 .imgprev{width:128px;height:128px;border-radius:8px;border:1px solid var(--line);margin-top:10px;display:block;background:#000}
+
+/* Keep the preview visible while reaching controls on narrow screens. */
+@media(max-width:780px){main{grid-template-columns:minmax(0,1fr);grid-template-rows:43svh auto}.panel,.stage{min-width:0}.panel{max-height:none;padding:16px;overflow:visible}.stage{overflow:hidden;order:-1;min-height:43svh;height:43svh;position:sticky;top:0;z-index:1;border-bottom:1px solid var(--line)}.hud{top:12px;left:12px;padding:8px 10px}select,textarea,button{font-size:16px}select,button{min-height:44px}.range input{min-width:0;min-height:28px;flex:1}.section{margin-top:14px;padding-top:13px}}
+@media(max-width:420px){.grid{grid-template-columns:1fr;gap:2px}}
 </style><script type="importmap">{"imports":{"three":"./assets/vendor/three/three.module.js","three/addons/":"./assets/vendor/three/addons/"}}</script></head><body><canvas id="wallpaper"></canvas><div id="veil"></div><main><aside class="panel"><div class="eyebrow">TOUCHY SUBJECTS LLC</div><h1 class="brand">Tactile Tile Studio</h1><p class="sub">Square tactile cards, built for variety and simple printability.</p>
 <div class="section"><h2>1. TILE FORMAT</h2><label>Physical format</label><select id="format"><option value="square">Square Tile · 63 × 63 mm</option><option value="card">Tall Card · 63 × 88 mm</option></select><p class="hint">The original square tile is the default. Texture is inset from the edge so every card keeps a strong, flat border.</p></div>
 <div class="section"><h2>2. TEXTURE LIBRARY</h2><label>Preset design</label><select id="preset"></select><label>Base shape (macro)</label><select id="base"></select><label>Surface texture (micro)</label><select id="micro"></select><button id="random" class="secondary">Randomize a distinct combo</button>
@@ -46,7 +50,7 @@ function addSlideFrame(group,W,H){
  const lip=rounded(W,H,6);lip.holes.push(roundedHole(ow,oh,3));
  const lipMesh=new THREE.Mesh(new THREE.ExtrudeGeometry(lip,{depth:2.2,bevelEnabled:false}),caseMat);lipMesh.position.z=5.6;lipMesh.name='frame';group.add(lipMesh);
 }
-camera.fov=45;camera.updateProjectionMatrix();camera.position.set(0,-60,60);orbit.target.set(0,0,0);scene.children[0].intensity=.5;key.intensity=1.8;key.position.set(20,-20,40);caseMat.transparent=false;caseMat.opacity=1;caseMat.depthWrite=true;caseMat.needsUpdate=true;const makeKeyringLoop=(W,H,zc)=>{const outer=new THREE.Shape(),hole=new THREE.Path();outer.absarc(0,0,7,0,Math.PI*2,false);hole.absarc(0,0,3.5,0,Math.PI*2,true);outer.holes.push(hole);const loop=new THREE.Mesh(new THREE.ExtrudeGeometry(outer,{depth:3,bevelEnabled:false}),caseMat);loop.position.set(0,H/2+2,zc-1.5);loop.name='keychain';return loop};
+camera.fov=45;camera.updateProjectionMatrix();camera.position.set(0,-100,100);orbit.target.set(0,0,0);scene.children[0].intensity=.5;key.intensity=1.8;key.position.set(20,-20,40);caseMat.transparent=false;caseMat.opacity=1;caseMat.depthWrite=true;caseMat.needsUpdate=true;const makeKeyringLoop=(W,H,zc)=>{const outer=new THREE.Shape(),hole=new THREE.Path();outer.absarc(0,0,7,0,Math.PI*2,false);hole.absarc(0,0,3.5,0,Math.PI*2,true);outer.holes.push(hole);const loop=new THREE.Mesh(new THREE.ExtrudeGeometry(outer,{depth:3,bevelEnabled:false}),caseMat);loop.position.set(0,H/2+2,zc-1.5);loop.name='keychain';return loop};
 const makeKeychain=(W,H,zc)=>{const g=new THREE.Group();g.add(makeKeyringLoop(W,H,zc));
  const ring=new THREE.Shape(),rh=new THREE.Path();ring.absarc(0,0,5,0,Math.PI*2,false);rh.absarc(0,0,2.8,0,Math.PI*2,true);ring.holes.push(rh);
  const conn=new THREE.Mesh(new THREE.ExtrudeGeometry(ring,{depth:3,bevelEnabled:false}),caseMat);conn.position.set(0,H/2+11,zc-1.5);conn.name='keychain';g.add(conn);
@@ -126,5 +130,25 @@ imgFile.onchange=()=>{
   img.src=URL.createObjectURL(file);
 };
 clearImgBtn.onclick=()=>{dropImage();sync()};
+
+// Validate the current slide-in frame dimensions with a small print first.
+const fitCouponExport=document.createElement('button');
+fitCouponExport.type='button';fitCouponExport.className='secondary';
+fitCouponExport.textContent='Export fit coupon STL';
+insertExport.after(fitCouponExport);
+fitCouponExport.onclick=()=>{
+  const coupon=new THREE.Group();
+  addSlideFrame(coupon,30,30);
+  const insert=makeTile(()=>0,20,20,1.5);
+  insert.position.x=38;coupon.add(insert);
+  downloadSTLGroup(coupon,'TouchySubjects_fit_coupon.stl');
+  coupon.traverse(part=>{if(part.isMesh)part.geometry.dispose()});
+  ui.status.textContent='Fit coupon exported: print the frame and insert before a full-size frame.';
+  ui.status.className='status ok';
+};
+const renderWithFitCoupon=render;
+render=()=>{renderWithFitCoupon();fitCouponExport.hidden=!state.modular||state.setMode!=='none'};
+render();
+
 window.__tileStudio={useImagePixels,dropImage,getMode:()=>state.mode};
 </script></body></html>
