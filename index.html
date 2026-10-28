@@ -182,16 +182,53 @@
         }
         main {
           grid-template-columns: 1fr;
-          grid-template-rows: auto 55vh;
+          grid-template-rows: 43svh auto;
           height: auto;
         }
         .panel {
-          max-height: 58vh;
+          max-height: none;
           border-right: 0;
           border-bottom: 1px solid var(--line);
+          padding: 16px;
+          overflow: visible;
         }
         .stage {
-          min-height: 55vh;
+          order: -1;
+          min-height: 43svh;
+          height: 43svh;
+          position: sticky;
+          top: 0;
+          z-index: 1;
+          border-bottom: 1px solid var(--line);
+        }
+        .hud {
+          top: 12px;
+          left: 12px;
+          padding: 8px 10px;
+        }
+        select,
+        textarea,
+        button {
+          font-size: 16px;
+        }
+        select,
+        button {
+          min-height: 44px;
+        }
+        .range input {
+          min-width: 0;
+          min-height: 28px;
+          flex: 1;
+        }
+        .section {
+          margin-top: 14px;
+          padding-top: 13px;
+        }
+      }
+      @media (max-width: 420px) {
+        .grid {
+          grid-template-columns: 1fr;
+          gap: 2px;
         }
       }
     </style>
@@ -991,13 +1028,32 @@
         for (let i = 0; i < p.count; i++) {
           const x = p.getX(i),
             y = p.getY(i),
-            vz = p.getZ(i);
+            vz = p.getZ(i),
+            radius = 6,
+            cx = W / 2 - radius,
+            cy = H / 2 - radius;
+          let mappedX = x,
+            mappedY = y;
+          // Map the dense rectangular grid into true rounded corners. This keeps
+          // the tactile field smooth while eliminating fragile square corners.
+          if (Math.abs(x) > cx && Math.abs(y) > cy) {
+            const u = Math.min(1, Math.max(0, (Math.abs(x) - cx) / radius)),
+              v = Math.min(1, Math.max(0, (Math.abs(y) - cy) / radius));
+            mappedX = Math.sign(x) * (cx + u * Math.sqrt(1 - (v * v) / 2) * radius);
+            mappedY = Math.sign(y) * (cy + v * Math.sqrt(1 - (u * u) / 2) * radius);
+          }
+          p.setX(i, mappedX);
+          p.setY(i, mappedY);
           if (vz > 0) {
-            const edge = Math.min(W / 2 - Math.abs(x), H / 2 - Math.abs(y)),
+            const ax = Math.abs(mappedX),
+              ay = Math.abs(mappedY),
+              edge = ax > cx && ay > cy
+                ? radius - Math.hypot(ax - cx, ay - cy)
+                : Math.min(W / 2 - ax, H / 2 - ay),
               fade = Math.max(0, Math.min(1, (edge - 4) / 3)),
               relief = Math.max(
                 -1.6,
-                Math.min(1.6, height(x / 3.15, y / 3.15, f) * 2.5),
+                Math.min(1.6, height(mappedX / 3.15, mappedY / 3.15, f) * 2.5),
               );
             p.setZ(i, vz + relief * fade);
           }
