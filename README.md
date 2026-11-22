@@ -95,6 +95,21 @@ design instead.
   For an uploaded image, the image is split at its original
   orientation so pieces align.
 
+## Additional printable objects
+
+The Object Options section adds three accessory families alongside the existing
+tile formats:
+
+- **Coasters** — round or rounded-square, 90 × 90 mm, with the current tactile
+  presets, custom equation, or image relief on the top face.
+- **Tactile tokens** — round tokens in 45, 60, and 75 mm diameters. They use
+  the same editable surface controls as tiles.
+- **Three-tile storage tray** — a smooth, open-top tray with three slots for
+  63 mm tiles. It measures 203 × 69 × 10.4 mm and prints without supports.
+
+Each object exports as its own binary STL with a descriptive filename. The
+preview HUD and print note show the selected object and its dimensions.
+
 ## Export
 
 All exports are binary STL.
