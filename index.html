@@ -131,7 +131,7 @@ function reliefDisc(f,diameter,z=0){
   for(let ri=1;ri<radial;ri++)for(let ai=0;ai<around;ai++){
     const next=(ai+1)%around,inner=1+(ri-1)*around+ai,innerNext=1+(ri-1)*around+next,outer=1+ri*around+ai,outerNext=1+ri*around+next;
     indices.push(inner,outer,outerNext,inner,outerNext,innerNext);
-    const bi=bottomOffset+(ri-1)*around+ai,bin=bottomOffset+(ri-1)*around+next,bo=bottomOffset+ri*around+ai,bon=bottomOffset+ri*around+next;
+    const bi=bottomOffset+1+(ri-1)*around+ai,bin=bottomOffset+1+(ri-1)*around+next,bo=bottomOffset+1+ri*around+ai,bon=bottomOffset+1+ri*around+next;
     indices.push(bi,bon,bo,bi,bin,bon);
   }
   const topEdge=1+(radial-1)*around;
