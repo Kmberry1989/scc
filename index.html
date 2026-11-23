@@ -97,7 +97,8 @@ function focusObject(type,preset,format){
 function configureObjectSections(){
   const tile=state.objectType==='tile',tray=state.objectType==='tray';
   if(tile)ui.printHint.textContent=state.modular?'Slide-in frame print: print frame and insert separately; 0.4 mm clearance per side.':'Print flat, without supports. Tile relief remains clamped to ±1.6 mm.';
-  for(const id of ['formatSection','textureSection','modifySection','caseSection','setSection'])document.getElementById(id).hidden=!tile;
+  for(const id of ['formatSection','caseSection','setSection'])document.getElementById(id).hidden=!tile;
+  for(const id of ['textureSection','modifySection'])document.getElementById(id).hidden=tray;
   document.getElementById('objectPresetWrap').hidden=tile;
   ui.objectHint.textContent=tile?'The existing tile editor and print options are active.':tray?'Smooth, three-slot tray for storing 63 mm tiles. Texture controls are hidden because the tray holds finished tiles.':'The existing tactile surface editor, presets, custom equations, and image relief apply to this object.';
 }
