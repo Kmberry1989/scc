@@ -57,7 +57,12 @@ pins are fiddly to print, lose, and push through. It is replaced by:
   play. To swap a tile, press the exposed tile through the lip opening
   and slide it back out the open end.
 - **Top keyring loop** — centered top loop, 14 mm across with a 7 mm hole,
-  for a split ring or small clasp.
+  for 6 mm split rings or small clasps (0.5 mm radial clearance). A flat,
+  full-thickness 14 mm-wide, 3.2 mm-deep bridge overlaps the tile at its attachment root; tactile
+  relief is suppressed across that root so custom equations cannot thin or
+  distort the connector. The frame-mounted loop shifts outward 0.8 mm and uses
+  a 7 mm bridge root, leaving 0.4 mm clearance from the insert while overlapping
+  the frame rim.
 - **Keychain fob on the loop** — a flat fob (32 × 26 mm, with a 5 mm hole at
   the far end for a split ring) joined to the loop by a flat connector
   ring. On a one-piece tile it hangs from the tile; on a frame it
@@ -81,8 +86,10 @@ design instead.
   220 mm bed diagonally, the 5-tile frame needs a larger bed or a
   small scale-down in the slicer. Inserts are in left-to-right order.
 - **Tile chain** — 3, 4, or 5 full 63 mm tiles, each with a 14 mm loop
-  (7 mm hole) on both sides. Links are not printed linked: print the
-  links, then join them with split rings or jump rings after printing.
+  (7 mm hole) on both sides. Each loop is part of a full-thickness, 3.2 mm-deep bridge that
+  overlaps the tile and leaves a flat reinforced root outside the equation
+  relief. Links are not printed linked: print the links, then join them with
+  split rings or jump rings after printing.
 - **Memory game** — 3 or 4 pairs, two tiles per texture. Tiles are
   identical in size and shape, backs are blank, so pairs match by
   touch only. Shuffle the printed tiles before playing.
