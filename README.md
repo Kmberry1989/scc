@@ -52,10 +52,18 @@ pins are fiddly to print, lose, and push through. It is replaced by:
 - **Slide-in frame** — one frame, no pins, no lid to lose. A 2.2 mm floor,
   a U-shaped wall (open at the bottom end), and a top lip frame that
   overlaps the insert by 2 mm per side. The pocket is 0.4 mm wider per
-  side than the insert, the insert slides in from the open end until it
-  hits the far wall, and the lip holds it down with 0.4 mm of vertical
-  play. To swap a tile, press the exposed tile through the lip opening
-  and slide it back out the open end.
+  side than the insert, and the lip holds it down with 0.4 mm of vertical
+  play. A side flex latch clicks behind the insert as it seats. Press its
+  outside button to release the catch; two spring fingers at the closed end
+  nudge the insert toward the opening for removal.
+- **Click-together keychain case** — a loop-bearing back tray and a front
+  bezel that snaps onto four perimeter clips. The 63 mm tile sits in a
+  0.4 mm-clearance pocket and is captured by a 2 mm retaining overlap. Export
+  the front, back, and tile as separate STLs. The front STL is oriented
+  bezel-face-down for printing. Clip teeth align with their lower windows with
+  0.4 mm radial and 0.5 mm tangential clearance; they sit 0.2 mm below the
+  upper retaining ledge when assembled. Flex the front clips outward to open the case and change the tile; the
+  case loop has a 7 mm hardware hole.
 - **Top keyring loop** — centered top loop, 14 mm across with a 7 mm hole,
   for 6 mm split rings or small clasps (0.5 mm radial clearance). A flat,
   full-thickness 14 mm-wide, 3.2 mm-deep bridge overlaps the tile at its attachment root; tactile
@@ -123,9 +131,12 @@ All exports are binary STL.
 
 - **Export solid STL** — one-piece tile (with loop/fob if those are on).
 - With the slide-in frame on, the button splits into **Export frame STL**
-  (floor + wall + lip, plus the keychain if that is on) and
-  **Export texture insert STL** — print separately, then slide the
-  insert in from the open end.
+  (floor + wall + lip + latch + ejector springs, plus the keychain if that is
+  on) and **Export texture insert STL** — print separately, then push the
+  insert in until the latch clicks.
+- With the click-together case on, export **case front**, **case back**, and
+  **case tile** separately. Print the back flat-side down and the front with
+  the bezel face on the bed, then click the halves together around the tile.
 - With a set on, the button splits into **Export set frame STL**
   (story and puzzle only) and **Export set tiles STL** — set tiles
   download as one file per tile, in set order, so a failed tile print
